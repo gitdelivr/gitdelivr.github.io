@@ -1,0 +1,864 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tool -GitDelivr Generator</title>
+    <meta name="description" content="Generate jsDelivr CDN links and get AI-powered usage guides for GitHub files.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --bg-dark: #0f172a;
+            --text-light: #f8fafc;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+            body {
+                background-color: var(--bg-dark);
+                color: var(--text-light);
+            }
+            input, summary, #fileList, textarea {
+                color: #e5e7eb;
+                background-color: #1e293b; /* Slate-800 */
+                border-color: #334155; /* Slate-700 */
+            }
+        }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+
+        #fileList {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* Loading Spinner Animation */
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 3px solid #3b82f6;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* AI Gradient Text */
+        .ai-gradient-text {
+            background: linear-gradient(to right, #4f46e5, #9333ea);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .ai-box-border {
+            position: relative;
+            z-index: 0;
+        }
+        .ai-box-border::before {
+            content: "";
+            position: absolute;
+            inset: -2px;
+            border-radius: 0.75rem;
+            background: linear-gradient(45deg, #4f46e5, #9333ea, #ec4899);
+            z-index: -1;
+            opacity: 0.3;
+            filter: blur(6px);
+        }
+
+        /* Chat Widget Styles */
+        .chat-widget-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 50;
+            transition: transform 0.3s ease;
+        }
+        .chat-widget-btn:hover { transform: scale(1.1); }
+        .chat-window {
+            position: fixed;
+            bottom: 90px;
+            right: 20px;
+            width: 350px;
+            max-width: 90vw;
+            height: 500px;
+            z-index: 49;
+            transform: translateY(20px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .chat-window.open {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+        }
+        .chat-messages { scrollbar-width: thin; }
+        .chat-messages::-webkit-scrollbar { width: 6px; }
+        .chat-messages::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.8); opacity: 0.5; }
+            100% { transform: scale(1.3); opacity: 0; }
+        }
+        .animate-pulse-ring::before {
+            content: '';
+            position: absolute;
+            left: 0; top: 0; width: 100%; height: 100%;
+            background-color: inherit;
+            border-radius: 50%;
+            z-index: -1;
+            animation: pulse-ring 2s infinite;
+        }
+
+        /* Custom Alert */
+        #customAlert {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+        }
+        #customAlert.show { opacity: 1; visibility: visible; }
+    </style>
+</head>
+<body class="bg-gray-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 min-h-screen font-sans flex flex-col transition-colors duration-300">
+
+    <!-- Maintenance Overlay -->
+    <div id="maintenanceOverlay" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm flex-col items-center justify-center z-[1000] hidden">
+        <div class="text-center p-8 bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700">
+            <svg class="w-16 h-16 mx-auto mb-4 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">Under Maintenance</h2>
+            <p id="maintenanceMessage" class="text-slate-600 dark:text-slate-400">The tool is currently unavailable. Please check back later.</p>
+        </div>
+    </div>
+
+    <!-- Announcement Banner -->
+    <div id="announcementBanner" class="fixed top-0 left-0 right-0 bg-purple-600 text-white p-3 text-center z-[2000] hidden transform -translate-y-full transition-transform duration-300 shadow-lg flex justify-center items-center">
+        <span class="mr-2">📢</span>
+        <p id="announcementText" class="text-sm font-medium inline-block mr-8"></p>
+        <button id="closeAnnouncement" class="absolute right-4 text-white/80 hover:text-white">✕</button>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="bg-white/90 dark:bg-slate-900/90 backdrop-blur-md shadow-sm sticky top-0 z-40 border-b border-gray-100 dark:border-slate-800">
+        <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <a href="index.html" class="flex items-center space-x-2 group">
+                    
+                    <span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">GitDelivr</span>
+                </a>
+                <div class="flex items-center space-x-6">
+                    <a href="index.html" class="text-sm font-medium text-slate-500 hover:text-blue-500 dark:text-slate-400 transition">Back to Home</a>
+                    <a href="https://www.buymeacoffee.com/Anuragfr" target="_blank" class="hidden sm:inline-flex items-center px-4 py-2 border border-transparent text-xs font-bold rounded-full text-yellow-900 bg-yellow-400 hover:bg-yellow-300 transition shadow-sm">
+                        ☕ Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow p-4 md:p-8">
+        <div class="max-w-4xl mx-auto">
+            
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-extrabold tracking-tight sm:text-4xl text-slate-900 dark:text-white mb-2">
+                    Link Generator
+                </h1>
+                <p class="text-slate-500 dark:text-slate-400">Convert raw GitHub files into production-ready assets.</p>
+            </div>
+
+            <!-- Main Tool Card -->
+            <div id="demo" class="bg-white dark:bg-slate-800 shadow-xl rounded-2xl p-6 md:p-8 mb-8 border border-slate-200 dark:border-slate-700">
+                
+                <!-- Auto-fill Section -->
+                <div class="mb-8 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800/50 transition-all hover:border-blue-300 dark:hover:border-blue-700">
+                    <label for="repoLink" class="block text-sm font-bold text-blue-700 dark:text-blue-300 mb-2 flex items-center">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                        Quick Auto-Fill
+                    </label>
+                    <input type="text" id="repoLink" 
+                        placeholder="Paste GitHub URL (e.g. https://github.com/user/repo/tree/main)" 
+                        class="w-full p-3 border border-blue-200 dark:border-blue-700 rounded-lg dark:bg-slate-900 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 text-sm transition-shadow"
+                        oninput="parseGitHubUrl(this.value)">
+                </div>
+
+                <h2 class="text-lg font-semibold mb-4 text-slate-800 dark:text-white">Repository Details</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                    <div class="form-group">
+                        <label for="user" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Username</label>
+                        <input type="text" id="user" placeholder="e.g., anuxagfr" class="w-full p-3 border border-slate-200 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 text-sm">
+                    </div>
+                    <div class="form-group">
+                        <label for="repo" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Repository</label>
+                        <input type="text" id="repo" placeholder="e.g., my-repo" class="w-full p-3 border border-slate-200 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 text-sm">
+                    </div>
+                    <div class="form-group">
+                        <label for="branch" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Branch</label>
+                        <input type="text" id="branch" placeholder="main" value="main" class="w-full p-3 border border-slate-200 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 text-sm">
+                    </div>
+                </div>
+
+                <details class="group mb-6">
+                    <summary id="token-details" class="cursor-pointer text-blue-600 dark:text-blue-400 hover:underline text-xs font-medium flex items-center">
+                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                        Add Token (Private Repos / High Rate Limit)
+                    </summary>
+                    <div class="form-group pt-3">
+                        <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx" class="w-full p-3 border border-slate-200 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-slate-200 text-sm">
+                    </div>
+                </details>
+                
+                <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition duration-200 shadow-lg shadow-blue-500/30 flex justify-center items-center" onclick="fetchFiles()">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                    Fetch Files
+                </button>
+                <p id="status-message" class="mt-4 text-center text-sm text-red-500 dark:text-red-400 font-medium"></p>
+
+                <!-- File Browser Section -->
+                <div id="file-browser" class="hidden mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
+                    <div class="form-group mb-4 relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </span>
+                        <input type="text" id="search" onkeyup="filterFiles()" placeholder="Filter files..." class="w-full pl-10 p-3 border border-slate-200 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 text-sm">
+                    </div>
+                    
+                    <button id="zip-download-button" class="w-full mb-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md flex justify-center items-center" onclick="downloadAllAsZip()">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                        Download Repository as ZIP
+                    </button>
+                    
+                    <ul id="fileList" class="border border-slate-200 dark:border-slate-600 rounded-xl divide-y divide-slate-200 dark:divide-slate-700 overflow-y-auto max-h-96 bg-slate-50 dark:bg-slate-900/50"></ul>
+                </div>
+            </div>
+
+            <!-- Output Card -->
+            <div id="output-container" class="bg-white dark:bg-slate-800 shadow-xl rounded-2xl p-6 md:p-8 hidden border border-slate-200 dark:border-slate-700 mb-12 animate-fade-in-up">
+                <h2 class="text-xl font-semibold mb-6 flex items-center text-slate-900 dark:text-white">
+                    <span class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mr-3 text-lg">🚀</span>
+                    Generated Link
+                </h2>
+                <div id="output" class="space-y-6">
+                    <!-- Content generated by JavaScript -->
+                </div>
+
+                <!-- AI TOOLS SECTION -->
+                <div id="ai-section" class="mt-8 pt-8 border-t border-slate-200 dark:border-slate-700 hidden">
+                    <div class="flex items-center mb-4">
+                        <span class="text-2xl mr-2">✨</span>
+                        <h3 class="text-xl font-bold ai-gradient-text">AI Power Tools</h3>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                        <!-- AI Button 1 -->
+                        <div class="p-5 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-100 dark:border-indigo-800 transition hover:shadow-md">
+                            <h4 class="font-bold text-indigo-900 dark:text-indigo-200 mb-1">How do I use this?</h4>
+                            <p class="text-xs text-indigo-600 dark:text-indigo-400 mb-4">Get a drop-in code snippet.</p>
+                            <button onclick="triggerAiUsage()" class="w-full py-2 bg-white dark:bg-slate-800 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 border border-indigo-200 dark:border-indigo-700 rounded-lg text-sm font-semibold text-indigo-600 dark:text-indigo-300 transition-colors flex justify-center items-center">
+                                Generate Guide
+                            </button>
+                        </div>
+                        <!-- AI Button 2 -->
+                        <div class="p-5 rounded-xl bg-purple-50 dark:bg-purple-900/20 border border-purple-100 dark:border-purple-800 transition hover:shadow-md">
+                            <h4 class="font-bold text-purple-900 dark:text-purple-200 mb-1">What is this repo?</h4>
+                            <p class="text-xs text-purple-600 dark:text-purple-400 mb-4">Summarize features & usage.</p>
+                            <button onclick="triggerAiSummary()" class="w-full py-2 bg-white dark:bg-slate-800 hover:bg-purple-50 dark:hover:bg-purple-900/30 border border-purple-200 dark:border-purple-700 rounded-lg text-sm font-semibold text-purple-600 dark:text-purple-300 transition-colors flex justify-center items-center">
+                                Analyze Repo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- AI Output Area -->
+                    <div id="aiOutputContainer" class="hidden ai-box-border bg-white dark:bg-slate-800 rounded-xl p-6 shadow-lg">
+                        <div class="flex justify-between items-start mb-4">
+                            <h4 id="aiOutputTitle" class="font-bold text-slate-900 dark:text-white text-lg">AI Response</h4>
+                            <button onclick="document.getElementById('aiOutputContainer').classList.add('hidden')" class="text-slate-400 hover:text-slate-600 p-1">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
+                        </div>
+                        <div id="aiLoading" class="hidden py-8 flex flex-col items-center justify-center text-slate-500 text-sm">
+                            <div class="loader mb-2"></div>
+                            <span>Consulting Gemini...</span>
+                        </div>
+                        <div id="aiContent" class="prose dark:prose-invert max-w-none text-sm font-mono bg-slate-50 dark:bg-slate-900/50 p-4 rounded-lg border border-slate-200 dark:border-slate-700 whitespace-pre-wrap"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-300 py-12 border-t border-slate-800">
+        <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div class="col-span-1 md:col-span-1">
+                <div class="flex items-center space-x-2 mb-4">
+                    <span class="text-xl font-bold text-white">GitDelivr</span>
+                </div>
+                <p class="text-sm text-slate-400">Making GitHub assets production-ready for developers worldwide.</p>
+                <div class="mt-6">
+                    <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-3">Newsletter</h4>
+                    <form id="newsletterForm" class="flex gap-2">
+                        <input id="newsletterEmail" type="email" placeholder="Email address" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-colors" required>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors">Subscribe</button>
+                    </form>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4">Product</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="#" class="hover:text-blue-400 transition">Generator Tool</a></li>
+                    <li><a href="index.html#features" class="hover:text-blue-400 transition">Features</a></li>
+                    <li><a href="index.html#faq" class="hover:text-blue-400 transition">FAQ</a></li>
+                    <li><a href="index.html" class="hover:text-blue-400 transition">Terms of Service</a></li>
+                    <li><a href="index.html" class="hover:text-blue-400 transition">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4">Resources</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="https://www.jsdelivr.com/" target="_blank" class="hover:text-blue-400 transition">jsDelivr Docs</a></li>
+                    <li><a href="https://github.com/" target="_blank" class="hover:text-blue-400 transition">GitHub API</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4">Connect</h4>
+                <ul class="space-y-3 text-sm">
+                    <li class="text-slate-400 flex items-center">
+                        <span class="mr-2">Owner:</span> 
+                        <span class="text-white font-medium">Anurag</span>
+                    </li>
+                    <li>
+                        <a href="mailto:gitdelivr@gmail.com" class="hover:text-blue-400 transition flex items-center group">
+                            <svg class="w-4 h-4 mr-2 text-slate-500 group-hover:text-blue-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            Contact
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://instagram.com/anuxagfr" target="_blank" class="hover:text-pink-400 transition flex items-center group">
+                            <svg class="w-4 h-4 mr-2 text-slate-500 group-hover:text-pink-400 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.436 4.564a5.518 5.518 0 013.924 1.614 5.518 5.518 0 011.614 3.924v7.896a5.518 5.518 0 01-1.614 3.924 5.518 5.518 0 01-3.924 1.614H6.564a5.518 5.518 0 01-3.924-1.614A5.518 5.518 0 011.026 17.998V10.102a5.518 5.518 0 011.614-3.924 5.518 5.518 0 013.924-1.614h10.872zM12 8.25a3.75 3.75 0 100 7.5 3.75 3.75 0 000-7.5zm4.875-1.5a.75.75 0 100 1.5.75.75 0 000-1.5z"></path></svg>
+                            Instagram <span class="opacity-75 text-xs ml-1">@anuxagfr</span>
+                        </a>
+                    </li>
+                    <li><a href="https://anuragfr.github.io" target="_blank" class="hover:text-blue-400 transition">My Portfolio</a></li>
+                    <li><a href="https://www.buymeacoffee.com/Anuragfr" class="hover:text-yellow-400 transition">Buy me a coffee</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="max-w-6xl mx-auto px-4 border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-sm text-slate-500 text-center md:text-left">
+                &copy; 2025 GitDelivr Generator. All rights reserved.
+            </div>
+            <div class="text-sm text-slate-500 flex items-center gap-1">
+                Created with <span class="text-red-500 animate-pulse">♥</span> by 
+                <a href="https://anuragfr.github.io" target="_blank" class="text-slate-300 hover:text-white font-medium transition border-b border-transparent hover:border-white">
+                    Anurag
+                </a>
+                <span class="mx-2 text-slate-700">|</span> <a href="admin.html" class="text-slate-600 hover:text-slate-400 text-xs">Admin</a>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- Custom Alert -->
+    <div id="customAlert" class="bg-green-500 text-white font-semibold py-3 px-6 rounded-lg shadow-lg">Copied to clipboard!</div>
+
+    <!-- Floating Chat Widget -->
+    <button id="chatToggle" class="chat-widget-btn bg-blue-600 hover:bg-blue-700 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center animate-pulse-ring">
+        <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"></path></svg>
+    </button>
+
+    <div id="chatWindow" class="chat-window bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 flex flex-col overflow-hidden">
+        <div class="bg-blue-600 p-4 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                <h3 class="text-white font-bold">Support Assistant</h3>
+            </div>
+            <button id="closeChat" class="text-blue-100 hover:text-white">✕</button>
+        </div>
+        <div id="chatMessages" class="chat-messages flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50 dark:bg-slate-900">
+            <div class="flex items-start">
+                <div class="bg-blue-100 dark:bg-blue-900 text-slate-800 dark:text-slate-200 p-3 rounded-lg rounded-tl-none max-w-[85%] text-sm shadow-sm">
+                    Hi! 👋 I'm theGitDel ivrAI assistant. I can help with Git or web dev questions.
+                </div>
+            </div>
+            <div class="flex items-start">
+                 <div class="bg-blue-100 dark:bg-blue-900 text-slate-800 dark:text-slate-200 p-3 rounded-lg rounded-tl-none max-w-[85%] text-sm shadow-sm leading-relaxed">
+                    Need human help? Contact Owner <strong>Anurag</strong>:<br>
+                    • <a href="mailto:gitdelivr@gmail.com" class="underline hover:text-blue-500">Email</a><br>
+                    • <a href="https://instagram.com/anuxagfr" target="_blank" class="underline hover:text-pink-500">Instagram</a>
+                </div>
+            </div>
+        </div>
+        <div class="p-3 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+            <div class="flex space-x-2">
+                <input type="text" id="chatInput" class="flex-1 px-3 py-2 bg-slate-100 dark:bg-slate-700 border border-transparent focus:border-blue-500 rounded-lg text-sm dark:text-white focus:outline-none" placeholder="Ask a question...">
+                <button id="sendMessage" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- API KEY ---
+        const apiKey = "AIzaSyDbiE9GiOr__azJtpdN1nAecPz-frcp7wA"; 
+
+        // --- Global State ---
+        let fileCache = [];
+        let currentCdnLink = "";
+        let currentRepoInfo = { user: "", repo: "", branch: "", file: "" };
+
+        // Elements
+        const statusMessage = document.getElementById("status-message");
+        const fileBrowser = document.getElementById("file-browser");
+        const outputContainer = document.getElementById("output-container");
+        const zipButton = document.getElementById("zip-download-button");
+        const aiSection = document.getElementById("ai-section");
+        const aiOutputContainer = document.getElementById("aiOutputContainer");
+        const aiLoading = document.getElementById("aiLoading");
+        const aiContent = document.getElementById("aiContent");
+        const aiOutputTitle = document.getElementById("aiOutputTitle");
+
+        // Dark Mode
+        (function() { if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) { document.body.classList.add('dark'); } })();
+
+        // Utilities
+        const escapeHtmlForOnclick = (str) => str ? str.replace(/\\/g, "\\\\").replace(/'/g, "\\'") : '';
+        const escapeHtmlAttribute = (str) => str ? str.replace(/"/g, '&quot;') : '';
+
+        // --- URL AUTO-FILL ---
+        function parseGitHubUrl(url) {
+            url = url.trim();
+            if (!url || !url.includes("github.com")) return;
+            try {
+                const urlObj = new URL(url);
+                const pathParts = urlObj.pathname.split('/').filter(p => p);
+                if (pathParts.length >= 2) {
+                    const user = pathParts[0];
+                    const repo = pathParts[1];
+                    document.getElementById('user').value = user;
+                    document.getElementById('repo').value = repo;
+                    if (pathParts.length >= 4 && (pathParts[2] === 'tree' || pathParts[2] === 'blob')) {
+                        document.getElementById('branch').value = pathParts[3];
+                    } else if (!document.getElementById('branch').value) {
+                        document.getElementById('branch').value = 'main';
+                    }
+                }
+            } catch (e) {}
+        }
+
+        // --- CORE LOGIC ---
+        function fetchFiles() {
+            const user = document.getElementById("user").value.trim();
+            const repo = document.getElementById("repo").value.trim();
+            const branch = document.getElementById("branch").value.trim() || "main";
+            const token = document.getElementById("token").value.trim();
+
+            if (!user || !repo) {
+                statusMessage.textContent = "GitHub Username and Repository Name are required.";
+                return;
+            }
+            currentRepoInfo = { user, repo, branch, file: "" };
+            statusMessage.textContent = "Fetching repository data...";
+            fileBrowser.classList.add("hidden");
+            outputContainer.classList.add("hidden");
+
+            const githubApiUrl = `https://api.github.com/repos/${user}/${repo}/git/trees/${branch}?recursive=1`;
+            const headers = token ? { Authorization: `token ${token}` } : {};
+
+            fetch(githubApiUrl, { headers: headers })
+            .then(res => res.json())
+            .then(data => {
+                if (data.message === "Bad credentials") throw new Error("❌ Invalid GitHub Token. Clear the token field for public repos.");
+                if (data.message === "Not Found") throw new Error("❌ Repository not found. Check spelling or visibility.");
+                if (!data.tree) throw new Error(data.message || "Invalid repo details");
+                
+                fileCache = data.tree.filter(f => f.type === "blob");
+                renderFileList(fileCache, user, repo, branch);
+                statusMessage.textContent = `Success! Found ${fileCache.length} files.`;
+                statusMessage.className = "mt-4 text-center text-sm text-green-600 dark:text-green-400 font-medium";
+                fileBrowser.classList.remove("hidden");
+                document.getElementById("search").value = "";
+                zipButton.disabled = fileCache.length === 0;
+            })
+            .catch(err => {
+                statusMessage.textContent = `${err.message}`;
+                statusMessage.className = "mt-4 text-center text-sm text-red-500 dark:text-red-400 font-medium";
+            });
+        }
+        
+        function renderFileList(files, user, repo, branch) {
+            const list = document.getElementById("fileList");
+            list.innerHTML = files.length ? "" : `<li class="p-4 text-center text-slate-500">No files found.</li>`;
+            files.forEach(f => {
+                const cdn = `https://cdn.jsdelivr.net/gh/${user}/${repo}@${branch}/${f.path}`;
+                const li = document.createElement("li");
+                li.className = "flex justify-between items-center p-4 hover:bg-slate-50 dark:hover:bg-slate-700 transition duration-150";
+                li.innerHTML = `<span class="truncate pr-4 text-sm text-slate-700 dark:text-slate-300">${f.path}</span><button class="flex-shrink-0 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded-lg transition" onclick="showCDN('${cdn}', '${escapeHtmlForOnclick(f.path)}')">Generate Link</button>`;
+                list.appendChild(li);
+            });
+        }
+
+        function showCDN(cdnLink, path) {
+            outputContainer.classList.remove("hidden");
+            aiSection.classList.remove("hidden");
+            aiOutputContainer.classList.add("hidden");
+            currentCdnLink = cdnLink;
+            currentRepoInfo.file = path;
+
+            const output = document.getElementById("output");
+            const ext = path.split('.').pop().toLowerCase();
+            const fileName = path.split('/').pop();
+            let tagValue = "";
+
+            if (ext === "js") tagValue = `<script src="${cdnLink}"><\/script>`;
+            else if (ext === "css") tagValue = `<link rel="stylesheet" href="${cdnLink}">`;
+            else if (["png", "jpg", "jpeg", "gif", "svg"].includes(ext)) tagValue = `<img src="${cdnLink}" alt="${fileName}">`;
+            
+            const safeTag = escapeHtmlAttribute(tagValue);
+            const safeLink = escapeHtmlAttribute(cdnLink);
+
+            output.innerHTML = `
+                <p class="text-sm text-slate-600 dark:text-slate-300"><span class="font-bold">File:</span> ${fileName}</p>
+                <div class="space-y-2 pt-2">
+                    <p class="font-bold text-xs uppercase text-slate-500 tracking-wide">CDN Link</p>
+                    <div class="flex"><input value="${cdnLink}" readonly class="flex-grow p-3 border border-slate-200 dark:border-slate-600 rounded-l-lg bg-slate-50 dark:bg-slate-900 text-sm text-slate-600 dark:text-slate-300 truncate"><button class="bg-slate-200 dark:bg-slate-600 p-3 rounded-r-lg hover:bg-slate-300 dark:hover:bg-slate-500 transition" onclick="copyToClipboard('${safeLink}')">📋</button></div>
+                </div>
+                ${tagValue ? `<div class="space-y-2 pt-4"><p class="font-bold text-xs uppercase text-slate-500 tracking-wide">HTML Tag</p><div class="flex"><input value='${tagValue}' readonly class="flex-grow p-3 border border-slate-200 dark:border-slate-600 rounded-l-lg bg-slate-50 dark:bg-slate-900 text-sm text-blue-600 dark:text-blue-400 font-mono truncate"><button class="bg-slate-200 dark:bg-slate-600 p-3 rounded-r-lg hover:bg-slate-300 dark:hover:bg-slate-500 transition" onclick="copyToClipboard('${safeTag}')">📋</button></div></div>` : ''}
+                <a class="inline-flex items-center mt-6 text-emerald-600 dark:text-emerald-400 hover:underline text-sm font-medium" href="${cdnLink}" download="${fileName}"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Download File</a>
+            `;
+            outputContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // --- ZIP & UTILS ---
+        async function downloadAllAsZip() {
+            if (!fileCache.length) return;
+            const user = document.getElementById("user").value.trim();
+            const repo = document.getElementById("repo").value.trim();
+            const branch = document.getElementById("branch").value.trim() || "main";
+            const zip = new JSZip();
+            let promises = [];
+            let processed = 0;
+            
+            zipButton.disabled = true;
+            zipButton.textContent = "Preparing...";
+
+            for (let f of fileCache) {
+                promises.push(fetch(`https://cdn.jsdelivr.net/gh/${user}/${repo}@${branch}/${f.path}`).then(r => r.ok ? r.arrayBuffer() : null).then(d => { if(d) zip.file(f.path, d); processed++; zipButton.textContent = `Downloading (${Math.round((processed/fileCache.length)*100)}%)...`; }).catch(e => { zip.file(f.path + ".error.txt", e.message); processed++; }));
+            }
+            await Promise.allSettled(promises);
+            const content = await zip.generateAsync({ type: "blob" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = `${repo}-${branch}.zip`;
+            link.click();
+            zipButton.disabled = false;
+            zipButton.textContent = "Download All Files as ZIP";
+            showCopyAlert("Download Started!", "bg-emerald-500");
+        }
+
+        function copyToClipboard(text) {
+            const el = document.createElement('textarea');
+            el.value = text;
+            document.body.appendChild(el);
+            el.select();
+            try { document.execCommand('copy'); showCopyAlert("Copied!", "bg-green-500"); } catch(e) {}
+            document.body.removeChild(el);
+        }
+
+        function showCopyAlert(msg, color) {
+            const alert = document.getElementById("customAlert");
+            alert.textContent = msg;
+            alert.className = `${color} text-white font-semibold py-3 px-6 rounded-lg shadow-lg`;
+            alert.classList.add("show");
+            setTimeout(() => alert.classList.remove("show"), 2000);
+        }
+
+        function filterFiles() {
+            const key = document.getElementById("search").value.toLowerCase();
+            const filtered = fileCache.filter(f => f.path.toLowerCase().includes(key));
+            const user = document.getElementById("user").value;
+            const repo = document.getElementById("repo").value;
+            const branch = document.getElementById("branch").value || "main";
+            renderFileList(filtered, user, repo, branch);
+        }
+
+        // --- AI & CHAT ---
+        function getApiKey() {
+            if(apiKey && apiKey !== "YOUR_ACTUAL_API_KEY_HERE") return apiKey;
+            let key = localStorage.getItem("gemini_api_key");
+            if(!key) {
+                key = prompt("Enter your Google Gemini API Key:");
+                if(key) localStorage.setItem("gemini_api_key", key);
+            }
+            return key;
+        }
+
+        async function callGemini(title, prompt, isChat = false) {
+            const key = getApiKey();
+            if(!key) return isChat ? "API Key Missing" : alert("API Key required!");
+            
+            if (!isChat) {
+                aiOutputContainer.classList.remove('hidden');
+                aiOutputTitle.textContent = title;
+                aiLoading.classList.remove('hidden');
+                aiContent.innerHTML = "";
+            }
+
+            try {
+                const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${key}`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+                });
+                const data = await res.json();
+                if(!res.ok) throw new Error(data.error?.message || "API Error");
+                const text = data.candidates[0].content.parts[0].text;
+                
+                if (isChat) return text;
+                aiLoading.classList.add('hidden');
+                aiContent.textContent = text;
+            } catch(e) {
+                if (isChat) return "Error: " + e.message;
+                aiLoading.classList.add('hidden');
+                aiContent.textContent = "Error: " + e.message;
+                if(e.message.includes("API key")) localStorage.removeItem("gemini_api_key");
+            }
+        }
+
+        function triggerAiUsage() {
+            callGemini("Installation Guide", `Generate usage snippet for ${currentRepoInfo.file} from ${currentCdnLink}.`);
+        }
+
+        function triggerAiSummary() {
+            callGemini("Repository Analysis", `Analyze GitHub repo ${document.getElementById("user").value}/${document.getElementById("repo").value}.`);
+        }
+
+        // Chat Logic
+        const chatBtn = document.getElementById('chatToggle');
+        const chatWindow = document.getElementById('chatWindow');
+        const closeChat = document.getElementById('closeChat');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendMessage');
+        const messagesContainer = document.getElementById('chatMessages');
+        
+        // Chat history state for the tool page specifically
+        let chatHistory = "System: You are the Anux CDN Support Assistant. Ask for the user's name if unknown. Use their name. Keep answers short.\n";
+
+        if(chatBtn) {
+            const toggle = () => chatWindow.classList.toggle('open');
+            chatBtn.onclick = toggle;
+            closeChat.onclick = toggle;
+            
+            const handleSend = async () => {
+                const text = chatInput.value.trim();
+                if (!text) return;
+                
+                // User Msg
+                messagesContainer.innerHTML += `<div class="flex justify-end"><div class="bg-blue-600 text-white rounded-tr-none p-3 rounded-lg max-w-[85%] text-sm shadow-sm">${text}</div></div>`;
+                chatInput.value = '';
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                // Update history
+                chatHistory += `User: ${text}\n`;
+
+                // Loading
+                const loadId = 'l-' + Date.now();
+                messagesContainer.innerHTML += `<div id="${loadId}" class="flex justify-start"><div class="bg-gray-100 dark:bg-slate-700 p-3 rounded-lg text-xs text-gray-500">Thinking...</div></div>`;
+                
+                // AI Call using history
+                const response = await callGemini(null, chatHistory, true);
+                
+                // Update history with bot response
+                if (!response.startsWith("Error") && !response.startsWith("API Key")) {
+                    chatHistory += `Assistant: ${response}\n`;
+                }
+                
+                document.getElementById(loadId).remove();
+                messagesContainer.innerHTML += `<div class="flex justify-start"><div class="bg-blue-100 dark:bg-blue-900 text-slate-800 dark:text-slate-200 rounded-tl-none p-3 rounded-lg max-w-[85%] text-sm shadow-sm">${response === "API Key Missing" ? "Please enter API Key via prompt first." : response}</div></div>`;
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            };
+
+            sendBtn.onclick = handleSend;
+            chatInput.onkeypress = (e) => { if(e.key === 'Enter') handleSend() };
+        }
+    </script>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, onSnapshot, addDoc, collection, serverTimestamp, setDoc, increment } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyC_U_pYSYWNm6Q1ufFwQE_tYlQZIYeDU0g",
+            authDomain: "cdn-generator.firebaseapp.com",
+            projectId: "cdn-generator",
+            storageBucket: "cdn-generator.firebasestorage.app",
+            messagingSenderId: "44677120607",
+            appId: "1:44677120607:web:b4719f7b7c6414cd19d1ea",
+            measurementId: "G-9RK16SGB09"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        async function listenForMaintenanceMode() {
+            try {
+                if (!auth.currentUser) await signInAnonymously(auth);
+            } catch (e) {
+                console.error("Anonymous auth failed for maintenance check", e);
+                return; // Can't check maintenance without auth
+            }
+            
+            const settingsRef = doc(db, 'settings', 'config');
+            const overlay = document.getElementById('maintenanceOverlay');
+            const msgEl = document.getElementById('maintenanceMessage');
+            let maintenanceTimeout;
+
+            onSnapshot(settingsRef, (docSnap) => {
+                const data = docSnap.exists() ? docSnap.data() : {};
+                let isMaintenance = data.maintenanceMode === true;
+                const isAdmin = localStorage.getItem('adminAuth') === 'true';
+                
+                // Clear existing timeout
+                if (maintenanceTimeout) clearTimeout(maintenanceTimeout);
+
+                // Check Schedule
+                if (!isMaintenance && data.scheduledStart) {
+                    const start = data.scheduledStart.toDate();
+                    const now = new Date();
+                    if (now >= start) {
+                        isMaintenance = true;
+                    } else {
+                        const delay = start - now;
+                        if (delay > 0 && delay < 2147483647) {
+                            maintenanceTimeout = setTimeout(() => {
+                                if (!localStorage.getItem('adminAuth')) {
+                                    overlay.classList.remove('hidden');
+                                    overlay.classList.add('flex');
+                                }
+                            }, delay);
+                        }
+                    }
+                }
+
+                if (isMaintenance && !isAdmin) {
+                    if(msgEl) msgEl.innerText = data.message || "The tool is currently unavailable. Please check back later.";
+                    overlay.classList.remove('hidden');
+                    overlay.classList.add('flex');
+                } else {
+                    overlay.classList.add('hidden');
+                    overlay.classList.remove('flex');
+
+                    // Show Admin Badge if maintenance is active but bypassed
+                    if (isMaintenance && isAdmin) {
+                        let badge = document.getElementById('adminMaintenanceBadge');
+                        if (!badge) {
+                            badge = document.createElement('div');
+                            badge.id = 'adminMaintenanceBadge';
+                            badge.className = 'fixed bottom-20 left-4 bg-yellow-500 text-white px-3 py-1 rounded-full text-xs font-bold z-[2000] shadow-lg pointer-events-none';
+                            badge.innerText = 'Maintenance Mode Active (Admin Bypass)';
+                            document.body.appendChild(badge);
+                        }
+                    } else {
+                        const badge = document.getElementById('adminMaintenanceBadge');
+                        if (badge) badge.remove();
+                    }
+                }
+            }, (error) => {
+                console.error("Could not listen for maintenance mode:", error);
+            });
+        }
+
+        listenForMaintenanceMode();
+
+        // --- Announcement Logic ---
+        function listenForAnnouncement() {
+            const announcementRef = doc(db, 'settings', 'announcement');
+            const banner = document.getElementById('announcementBanner');
+            const text = document.getElementById('announcementText');
+            const closeBtn = document.getElementById('closeAnnouncement');
+
+            if(closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    banner.classList.add('-translate-y-full');
+                    sessionStorage.setItem('announcementClosed', 'true');
+                    // Only close THIS specific message
+                    const currentMsg = document.getElementById('announcementText').innerText;
+                    sessionStorage.setItem('closedAnnouncement', currentMsg);
+                });
+            }
+
+            onSnapshot(announcementRef, (snap) => {
+                if(snap.exists()) {
+                    const data = snap.data();
+                    if(data.active && data.message && !sessionStorage.getItem('announcementClosed')) {
+                    const wasClosed = sessionStorage.getItem('closedAnnouncement') === data.message;
+
+                    if(data.active && data.message && !wasClosed) {
+                        text.innerText = data.message;
+                        
+                        // Reset colors and apply new type
+                        banner.classList.remove('bg-purple-600', 'bg-yellow-600', 'bg-red-600');
+                        if (data.type === 'warning') banner.classList.add('bg-yellow-600');
+                        else if (data.type === 'error') banner.classList.add('bg-red-600');
+                        else banner.classList.add('bg-purple-600');
+
+                        banner.classList.remove('hidden');
+                        setTimeout(() => banner.classList.remove('-translate-y-full'), 100);
+                    } else { banner.classList.add('-translate-y-full'); }
+                }
+            });
+        }
+        listenForAnnouncement();
+
+        // --- Newsletter Submission ---
+        const newsletterForm = document.getElementById('newsletterForm');
+        
+        if (newsletterForm) {
+            newsletterForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const emailInput = document.getElementById('newsletterEmail');
+                const btn = newsletterForm.querySelector('button');
+                const email = emailInput.value;
+
+                if (!email) return;
+
+                try {
+                    if (!auth.currentUser) await signInAnonymously(auth);
+
+                    const originalText = btn.innerText;
+                    btn.disabled = true;
+                    btn.innerText = "...";
+
+                    await addDoc(collection(db, 'subscribers'), { email, timestamp: serverTimestamp() });
+
+                    btn.innerText = "✓";
+                    emailInput.value = '';
+                    setTimeout(() => { btn.disabled = false; btn.innerText = originalText; }, 3000);
+
+                } catch (error) {
+                    console.error("Error subscribing:", error);
+                    alert("Subscription failed. Error: " + (error.message || "Unknown error."));
+                    btn.disabled = false;
+                    btn.innerText = "Subscribe";
+                }
+            });
+        }
+    </script>
+</body>
+</html>
