@@ -201,7 +201,7 @@ async function callGemini(title, prompt, isChat = false) {
 
     try {
         // 2. Fetch from Netlify Function
-        const response = await fetch("/.netlify/functions/gemini", {
+        const response = await fetch("https://gitdelivr.github.io/.netlify/functions/gemini", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ 
