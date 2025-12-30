@@ -306,7 +306,35 @@
         </div>
     </div>
     <script type="module" src="script.js"></script>
+
+    <script>
+
+
+        
+        // --- URL AUTO-FILL ---
+        function parseGitHubUrl(url) {
+            url = url.trim();
+            if (!url || !url.includes("github.com")) return;
+            try {
+                const urlObj = new URL(url);
+                const pathParts = urlObj.pathname.split('/').filter(p => p);
+                if (pathParts.length >= 2) {
+                    const user = pathParts[0];
+                    const repo = pathParts[1];
+                    document.getElementById('user').value = user;
+                    document.getElementById('repo').value = repo;
+                    if (pathParts.length >= 4 && (pathParts[2] === 'tree' || pathParts[2] === 'blob')) {
+                        document.getElementById('branch').value = pathParts[3];
+                    } else if (!document.getElementById('branch').value) {
+                        document.getElementById('branch').value = 'main';
+                    }
+                }
+            } catch (e) {}
+        }
+
+    </script>
 </body>
 </html>
+
 
 
