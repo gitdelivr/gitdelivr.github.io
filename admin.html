@@ -3,42 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GitDelivr Admin</title>
+    <title>Portfolio Admin</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-50 dark:bg-slate-900 min-h-screen font-sans text-slate-900 dark:text-slate-100">
 
-    <!-- Login Overlay -->
     <div id="loginOverlay" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center">
         <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-slate-700">
             <div class="text-center mb-8">
                 <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">Admin Access</h1>
-                <p class="text-slate-600 dark:text-slate-400">Enter your credentials to continue</p>
+                <p class="text-slate-600 dark:text-slate-400">Portfolio Management System</p>
             </div>
             <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email</label>
-                    <input type="email" id="adminEmail" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" placeholder="admin@example.com">
-                </div>
-                <div>
-                    <div class="flex justify-between items-center mb-2">
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300">Password</label>
-                        <button id="forgotPasswordBtn" class="text-xs text-blue-400 hover:text-blue-300 transition-colors">Forgot Password?</button>
-                    </div>
-                    <input type="password" id="adminPass" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all" placeholder="••••••••">
-                </div>
-                <div class="pt-2 space-y-3">
-                    <button id="loginBtn" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-1">
-                        Login to Dashboard
-                    </button>
-                </div>
+                <input type="email" id="adminEmail" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" placeholder="admin@example.com">
+                <input type="password" id="adminPass" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 dark:text-white outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
+                <button id="loginBtn" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg transition-transform hover:-translate-y-1">Login</button>
             </div>
         </div>
     </div>
 
-    <!-- Dashboard Content -->
     <div id="dashboard" class="hidden min-h-screen p-6 md:p-8">
         <div class="max-w-7xl mx-auto">
             <div class="flex justify-between items-center mb-8">
@@ -47,151 +32,94 @@
                     <p class="text-slate-500 dark:text-slate-400">Welcome back, Admin</p>
                 </div>
                 <div class="flex gap-4">
-                    <a href="index.html" class="px-4 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm font-medium flex items-center">
-                        View Site
-                    </a>
-                    <button id="logoutBtn" class="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg border border-red-100 dark:border-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors text-sm font-medium">
-                        Logout
-                    </button>
+                    <a href="index.html" class="px-4 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm font-medium flex items-center">View Site</a>
+                    <button id="logoutBtn" class="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg border border-red-100 dark:border-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors text-sm font-medium">Logout</button>
                 </div>
             </div>
 
-        <!-- Stats Overview -->
-        <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
-                <h3 class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase">Total Messages</h3>
-                <p class="text-3xl font-bold text-slate-800 dark:text-white mt-2" id="statMessages">0</p>
-            </div>
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
-                <h3 class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase">Subscribers</h3>
-                <p class="text-3xl font-bold text-slate-800 dark:text-white mt-2" id="statSubscribers">0</p>
-            </div>
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
-                <h3 class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase">Avg Rating</h3>
-                <p class="text-3xl font-bold text-slate-800 dark:text-white mt-2" id="statRating">0.0</p>
-            </div>
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
-                <h3 class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase">Total Traffic</h3>
-                <p class="text-3xl font-bold text-slate-800 dark:text-white mt-2" id="statTraffic">0</p>
-            </div>
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
-                <h3 class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase">Avg Time</h3>
-                <p class="text-3xl font-bold text-slate-800 dark:text-white mt-2" id="statTime">0s</p>
-            </div>
-        </div>
-
-        <!-- Traffic Chart Section -->
-        <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 mb-8">
-            <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-                <h2 class="text-xl font-bold text-slate-800 dark:text-white">Traffic Overview</h2>
-                <div class="flex bg-gray-100 dark:bg-slate-700 rounded-lg p-1">
-                    <button onclick="window.updateChart('7d')" id="btn-7d" class="px-4 py-1.5 text-sm font-medium rounded-md transition-all bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-300 shadow-sm">7 Days</button>
-                    <button onclick="window.updateChart('1m')" id="btn-1m" class="px-4 py-1.5 text-sm font-medium rounded-md transition-all text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">30 Days</button>
-                    <button onclick="window.updateChart('1y')" id="btn-1y" class="px-4 py-1.5 text-sm font-medium rounded-md transition-all text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">1 Year</button>
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
+                    <h3 class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase">Total Visitors</h3>
+                    <p class="text-3xl font-bold text-slate-800 dark:text-white mt-2" id="statTraffic">0</p>
                 </div>
-            </div>
-            <div class="relative h-72 w-full">
-                <canvas id="trafficChart"></canvas>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
-            <!-- Messages Section -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold flex items-center text-slate-800 dark:text-white"><span class="bg-blue-100 text-blue-600 p-2 rounded-lg mr-3 text-lg">📩</span>Messages</h2>
-                    <input type="text" id="searchMessages" placeholder="Search..." class="px-3 py-1 text-sm border border-gray-200 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-700 dark:text-white focus:outline-none focus:border-blue-500">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
+                    <h3 class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase">Messages</h3>
+                    <p class="text-3xl font-bold text-slate-800 dark:text-white mt-2" id="statMessages">0</p>
                 </div>
-                <div id="messagesList" class="space-y-4 max-h-[500px] overflow-y-auto pr-2">
-                    <p class="text-gray-500 text-center py-4">Loading...</p>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
+                    <h3 class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase">Projects</h3>
+                    <p class="text-3xl font-bold text-slate-800 dark:text-white mt-2" id="statProjects">0</p>
+                </div>
+                 <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
+                    <h3 class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase">Avg Time</h3>
+                    <p class="text-3xl font-bold text-slate-800 dark:text-white mt-2" id="statTime">0s</p>
                 </div>
             </div>
 
-            <!-- Subscribers Section -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700">
-                <div class="flex justify-between items-center mb-4">
-                    <h2 class="text-xl font-bold flex items-center text-slate-800 dark:text-white"><span class="bg-green-100 text-green-600 p-2 rounded-lg mr-3 text-lg">📰</span>Subscribers</h2>
-                    <button id="exportCsvBtn" class="text-xs font-bold text-green-600 bg-green-100 hover:bg-green-200 px-3 py-1.5 rounded-lg transition-colors">Export CSV</button>
-                </div>
-                <div id="subscribersList" class="space-y-2 max-h-[500px] overflow-y-auto pr-2">
-                    <p class="text-gray-500 text-center py-4">Loading...</p>
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 mb-8">
+                <h2 class="text-xl font-bold text-slate-800 dark:text-white mb-4">Traffic Overview</h2>
+                <div class="relative h-72 w-full">
+                    <canvas id="trafficChart"></canvas>
                 </div>
             </div>
 
-             <!-- Reviews Section -->
-             <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 lg:col-span-2">
-                <h2 class="text-xl font-bold mb-4 flex items-center text-slate-800 dark:text-white">
-                    <span class="bg-yellow-100 text-yellow-600 p-2 rounded-lg mr-3 text-lg">⭐</span>
-                    Reviews
-                </h2>
-                <div id="reviewsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <p class="text-gray-500 text-center py-4 col-span-full">Loading...</p>
-                </div>
-            </div>
-
-            <!-- Settings Section -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 lg:col-span-2">
-                <h2 class="text-xl font-bold mb-4 flex items-center text-slate-800 dark:text-white">
-                    <span class="bg-gray-100 text-gray-600 p-2 rounded-lg mr-3 text-lg">⚙️</span>
-                    Settings
-                </h2>
-                <div class="space-y-4">
-                    <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
-                        <div>
-                            <h4 class="font-bold text-slate-800 dark:text-white">Maintenance Mode</h4>
-                            <p class="text-xs text-slate-500 dark:text-slate-400">Disables the main generator tool for all users.</p>
-                        </div>
-                        <label class="relative inline-flex items-center cursor-pointer">
-                            <input type="checkbox" id="maintenanceToggle" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-                        </label>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 lg:col-span-2">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-bold flex items-center text-slate-800 dark:text-white">
+                            <span class="bg-indigo-100 text-indigo-600 p-2 rounded-lg mr-3 text-lg">🚀</span>
+                            Projects
+                        </h2>
+                        <button onclick="document.getElementById('projectModal').classList.remove('hidden')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-bold shadow-md transition-colors">
+                            + Add Project
+                        </button>
                     </div>
-                    <div class="p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Custom Message</label>
-                        <div class="flex gap-2">
-                            <input type="text" id="maintenanceMsgInput" class="flex-1 p-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 dark:text-white text-sm focus:outline-none focus:border-blue-500" placeholder="The tool is currently unavailable. Please check back later.">
-                            <button id="saveMaintenanceMsg" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Save</button>
-                        </div>
-                    </div>
-                    <div class="p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
-                        <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Schedule Maintenance</label>
-                        <div class="flex gap-2 flex-col sm:flex-row">
-                            <input type="datetime-local" id="scheduleInput" class="flex-1 p-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 dark:text-white text-sm focus:outline-none focus:border-blue-500">
-                            <button id="saveScheduleBtn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm">Schedule</button>
-                        </div>
-                        <div id="scheduledStatus" class="mt-2 text-xs text-slate-500 dark:text-slate-400 hidden">
-                            Scheduled for: <span id="scheduledTimeDisplay" class="font-bold text-slate-700 dark:text-slate-200"></span>
-                            <button id="cancelScheduleBtn" class="ml-2 text-red-500 hover:text-red-700 underline">Cancel</button>
-                        </div>
+                    <div id="projectsList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <p class="text-gray-500 text-center col-span-full py-4">Loading projects...</p>
                     </div>
                 </div>
-            </div>
 
-            <!-- Announcement Section -->
-            <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 lg:col-span-2">
-                <h2 class="text-xl font-bold mb-4 flex items-center text-slate-800 dark:text-white">
-                    <span class="bg-purple-100 text-purple-600 p-2 rounded-lg mr-3 text-lg">📢</span>
-                    Global Announcement
-                </h2>
-                <div class="space-y-4">
-                    <textarea id="announcementMsg" rows="2" class="w-full p-3 border border-gray-200 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-700 dark:text-white text-sm focus:outline-none focus:border-purple-500" placeholder="Enter announcement message (e.g., 'Server maintenance in 10 mins')..."></textarea>
-                    <div class="flex justify-between items-center bg-gray-50 dark:bg-slate-700 p-3 rounded-lg">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700">
+                    <h2 class="text-xl font-bold flex items-center mb-4 text-slate-800 dark:text-white"><span class="bg-blue-100 text-blue-600 p-2 rounded-lg mr-3 text-lg">📩</span>Messages</h2>
+                    <div id="messagesList" class="space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                        <p class="text-gray-500 text-center py-4">Loading...</p>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700">
+                    <h2 class="text-xl font-bold mb-4 flex items-center text-slate-800 dark:text-white">
+                        <span class="bg-purple-100 text-purple-600 p-2 rounded-lg mr-3 text-lg">📢</span> Announcement
+                    </h2>
+                    <textarea id="announcementMsg" rows="2" class="w-full p-3 border border-gray-200 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-700 dark:text-white text-sm focus:outline-none focus:border-purple-500 mb-3" placeholder="Enter announcement..."></textarea>
+                    <div class="flex justify-between items-center">
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="announcementToggle" class="sr-only peer">
-                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-purple-600"></div>
-                            <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Active</span>
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
                         </label>
-                        <select id="announcementType" class="p-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 dark:text-white text-sm focus:outline-none focus:border-purple-500 mx-2">
-                            <option value="info">Info ℹ️</option>
-                            <option value="warning">Warning ⚠️</option>
-                            <option value="error">Error 🚨</option>
-                        </select>
-                        <button id="saveAnnouncement" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg transition-colors text-sm shadow-lg shadow-purple-500/30">Send Push</button>
+                        <button id="saveAnnouncement" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded-lg text-sm">Update</button>
                     </div>
                 </div>
-            </div>
 
+            </div>
+        </div>
+    </div>
+
+    <div id="projectModal" class="hidden fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-lg rounded-2xl shadow-2xl p-6 relative">
+            <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">Add New Project</h3>
+            <div class="space-y-4">
+                <input type="text" id="projTitle" placeholder="Project Title" class="w-full p-3 border dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white">
+                <input type="text" id="projLink" placeholder="Live URL (e.g. https://...)" class="w-full p-3 border dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white">
+                <input type="text" id="projRepo" placeholder="GitHub Repo URL" class="w-full p-3 border dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white">
+                <input type="text" id="projIcon" placeholder="Icon Class (e.g. fas fa-code)" class="w-full p-3 border dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white">
+                <textarea id="projDesc" placeholder="Short Description" rows="2" class="w-full p-3 border dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white"></textarea>
+                <input type="text" id="projTags" placeholder="Tags (HTML, CSS, JS)" class="w-full p-3 border dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-white">
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="document.getElementById('projectModal').classList.add('hidden')" class="px-4 py-2 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg">Cancel</button>
+                <button id="saveProjectBtn" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow-lg">Save Project</button>
+            </div>
         </div>
     </div>
 
