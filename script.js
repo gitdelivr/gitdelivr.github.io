@@ -228,7 +228,7 @@ async function callGemini(title, prompt, isChat = false) {
 
     } catch (e) {
         console.error("AI Error:", e);
-        const errorMessage = "⚠️ Failed to fetch AI response. Please try again later.";
+        const errorMessage = "Our AI Chat Support is getting an upgrade. We’re building a smarter, faster way to help you. We'll be live very soon!";
         
         if (isChat) return errorMessage;
 
@@ -236,7 +236,7 @@ async function callGemini(title, prompt, isChat = false) {
         aiContent.textContent = errorMessage + ` (${e.message})`;
     }
 }
-
+//⚠️ Failed to fetch AI response. Please try again later.
 function triggerAiUsage() {
     const prompt = `Generate a code snippet and usage explanation for the file '${currentRepoInfo.file}' which is a ${currentRepoInfo.file.split('.').pop()} file. The CDN link is: ${currentCdnLink}. Keep it concise.`;
     callGemini("Installation Guide", prompt);
