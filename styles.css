@@ -34,9 +34,7 @@
     background-color: var(--primary-hover);
     transform: translateY(-1px);
 }
-nav {
-    padding-top: 35px;
-}/* या जितना आपको सही लगे */
+
 /* Navbar Button */
 .bmc-button {
     background-color: var(--bmc-yellow);
