@@ -311,31 +311,75 @@
     <script>
 
 
-        
-        // --- URL AUTO-FILL ---
-        function parseGitHubUrl(url) {
-            url = url.trim();
-            if (!url || !url.includes("github.com")) return;
-            try {
-                const urlObj = new URL(url);
-                const pathParts = urlObj.pathname.split('/').filter(p => p);
-                if (pathParts.length >= 2) {
-                    const user = pathParts[0];
-                    const repo = pathParts[1];
-                    document.getElementById('user').value = user;
-                    document.getElementById('repo').value = repo;
-                    if (pathParts.length >= 4 && (pathParts[2] === 'tree' || pathParts[2] === 'blob')) {
-                        document.getElementById('branch').value = pathParts[3];
-                    } else if (!document.getElementById('branch').value) {
-                        document.getElementById('branch').value = 'main';
-                    }
-                }
-            } catch (e) {}
+        // --- DUAL MODE: MANUAL PASTE + AUTO-OPEN LOGIC ---
+
+// 1. Manual Paste Function (Aapka existing logic thode sudhar ke saath)
+function parseGitHubUrl(url) {
+    url = url.trim();
+    if (!url || !url.includes("github.com")) return;
+    try {
+        const urlObj = new URL(url);
+        const pathParts = urlObj.pathname.split('/').filter(p => p);
+        if (pathParts.length >= 2) {
+            const user = pathParts[0];
+            const repo = pathParts[1];
+            document.getElementById('user').value = user;
+            document.getElementById('repo').value = repo;
+            
+            if (pathParts.length >= 4 && (pathParts[2] === 'tree' || pathParts[2] === 'blob')) {
+                document.getElementById('branch').value = pathParts[3];
+            } else {
+                document.getElementById('branch').value = 'main';
+            }
+
+            // Paste karte hi automatically files fetch karein
+            if (typeof fetchFiles === "function") {
+                setTimeout(fetchFiles, 500); 
+            }
         }
+    } catch (e) {
+        console.error("Parsing error:", e);
+    }
+}
+
+// 2. Automatic URL Detection (Jab koi gitdelivr.in/user/repo par aaye)
+function handleAutoOpen() {
+    const pathParts = window.location.pathname.split('/').filter(p => p);
+    
+    // Check if it's a GitHub style path (e.g., /username/repository)
+    if (pathParts.length >= 2) {
+        // Internal pages ko skip karein
+        const internalPages = ['index.html', 'app.html', 'admin.html', 'cdn_generator.html', 'GitDelivr_App.html'];
+        if (internalPages.includes(pathParts[0])) return;
+
+        const user = pathParts[0];
+        const repo = pathParts[1];
+        let branch = 'main';
+
+        if (pathParts.length >= 4 && (pathParts[2] === 'tree' || pathParts[2] === 'blob')) {
+            branch = pathParts[3];
+        }
+
+        // UI Fill karein
+        document.getElementById('user').value = user;
+        document.getElementById('repo').value = repo;
+        document.getElementById('branch').value = branch;
+
+        // Automatically fetch files
+        if (typeof fetchFiles === "function") {
+            console.log("Auto-opening repository...");
+            setTimeout(fetchFiles, 800); // 0.8s delay smooth transition ke liye
+        }
+    }
+}
+
+// Initialize on load
+window.addEventListener('DOMContentLoaded', handleAutoOpen);
 
     </script>
 </body>
 </html>
+
 
 
 
