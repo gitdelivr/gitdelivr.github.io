@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Engineering Blog | GitDelivr</title>
+    <meta name="description" content="Latest updates, tutorials, and engineering insights from the GitDelivr team.">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- YOUR GITDELIVR THEME --- */
+        :root {
+            --bg-main: #0B1121; --bg-card: #151e32; --bg-footer: #020617; 
+            --primary-blue: #2563EB; --text-white: #ffffff; --text-gray: #94A3B8; --border-color: #1E293B;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-white); line-height: 1.6; }
+        a { text-decoration: none; color: inherit; transition: 0.3s; }
+        img { max-width: 100%; display: block; }
+
+        /* NAVBAR */
+        header { background-color: rgba(11, 17, 33, 0.95); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--border-color); padding: 1rem 0; }
+        .nav-container { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; position: relative; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: white; letter-spacing: -0.5px; }
+        .nav-links { display: flex; gap: 32px; align-items: center; }
+        .nav-links a { font-size: 0.95rem; font-weight: 500; color: var(--text-gray); }
+        .nav-links a:hover, .nav-links a.active { color: white; }
+        .menu-btn { display: none; color: white; font-size: 1.5rem; cursor: pointer; user-select: none; }
+
+        @media (max-width: 768px) {
+            .menu-btn { display: block; }
+            .nav-links { display: none; position: absolute; top: 100%; left: 0; width: 100%; background-color: var(--bg-main); border-bottom: 1px solid var(--border-color); flex-direction: column; align-items: flex-start; padding: 20px; gap: 20px; z-index: 999; }
+            .nav-links.active { display: flex; }
+            .nav-links a { width: 100%; display: block; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        }
+
+        /* HERO & GRID */
+        .hero { text-align: center; padding: 80px 24px 60px; background: radial-gradient(circle at top, #1e293b 0%, var(--bg-main) 70%); }
+        .hero h1 { font-size: 3rem; font-weight: 800; margin-bottom: 16px; background: linear-gradient(to right, #fff, #94a3b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .hero p { color: var(--text-gray); font-size: 1.125rem; max-width: 600px; margin: 0 auto; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 24px 80px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 32px; }
+
+        /* CARDS */
+        .card { background-color: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; overflow: hidden; transition: transform 0.3s ease, border-color 0.3s; display: flex; flex-direction: column; }
+        .card:hover { transform: translateY(-5px); border-color: var(--primary-blue); }
+        .card-img-wrapper { height: 220px; background: #1e293b; overflow: hidden; position: relative; }
+        .card-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: 0.5s; }
+        .card:hover .card-img-wrapper img { transform: scale(1.05); }
+        .card-content { padding: 24px; display: flex; flex-direction: column; flex-grow: 1; }
+        .tag { background: rgba(37, 99, 235, 0.1); color: var(--primary-blue); font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 20px; display: inline-block; margin-bottom: 12px; width: fit-content; }
+        .card h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 10px; color: white; line-height: 1.4; }
+        .card p { font-size: 0.95rem; color: var(--text-gray); margin-bottom: 20px; flex-grow: 1; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 16px; margin-top: auto; font-size: 0.875rem; color: var(--text-gray); }
+        .read-link { color: var(--primary-blue); font-weight: 500; display: flex; align-items: center; gap: 4px; }
+
+        /* FOOTER */
+        footer { background-color: var(--bg-footer); padding: 60px 0 20px; border-top: 1px solid var(--border-color); }
+        .footer-content { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 60px; }
+        .footer-col h3 { color: white; font-size: 1rem; font-weight: 600; margin-bottom: 20px; }
+        .footer-links li { margin-bottom: 12px; list-style: none; }
+        .footer-links a { color: var(--text-gray); font-size: 0.95rem; }
+        .footer-links a:hover { color: white; }
+        .footer-desc { color: var(--text-gray); font-size: 0.95rem; margin: 16px 0 24px; max-width: 300px; }
+        .newsletter-form { display: flex; gap: 10px; }
+        .newsletter-form input { background: #1e293b; border: 1px solid var(--border-color); padding: 10px; border-radius: 6px; color: white; width: 100%; }
+        .newsletter-form button { background: var(--primary-blue); color: white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; }
+        .footer-bottom { max-width: 1200px; margin: 0 auto; padding: 24px 24px 0; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; color: #64748b; font-size: 0.9rem; }
+        
+        @media (max-width: 900px) { .footer-content { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 768px) { .footer-content { grid-template-columns: 1fr; } .hero h1 { font-size: 2rem; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-container">
+            <a href="/" class="logo">GitDelivr</a>
+            <div class="menu-btn" onclick="toggleMenu()">☰</div>
+            <nav class="nav-links" id="navLinks">
+                <a href="#">Download App</a>
+                <a href="#">Tool</a>
+                <a href="#">Features</a>
+                <a href="#">How It Works</a>
+                <a href="#">FAQ</a>
+                <a href="#">Contact</a>
+                <a href="/blog" class="active" style="color:white;">Blog</a>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <h1>Engineering & Updates</h1>
+        <p>Latest news, tutorials, and insights from the GitDelivr team.</p>
+    </section>
+
+    <main class="container">
+        <div id="blog-grid" class="grid">
+            <p style="color:var(--text-gray); text-align:center; grid-column:1/-1;">Loading articles from Contentful...</p>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-col">
+                <div class="logo">GitDelivr</div>
+                <p class="footer-desc">Making GitHub assets production-ready for developers worldwide.</p>
+                <form class="newsletter-form">
+                    <input type="email" placeholder="Email address">
+                    <button type="button">Subscribe</button>
+                </form>
+            </div>
+            <div class="footer-col">
+                <h3>Product</h3>
+                <ul class="footer-links">
+                    <li><a href="#">CDN Tool</a></li>
+                    <li><a href="#">Features</a></li>
+                    <li><a href="#">FAQ</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Resources</h3>
+                <ul class="footer-links">
+                    <li><a href="#">jsDelivr Docs</a></li>
+                    <li><a href="#">GitHub</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>Connect</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Contact Support</a></li>
+                    <li><a href="#">GitHub Repository</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 GitDelivr. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        function toggleMenu() { document.getElementById('navLinks').classList.toggle('active'); }
+
+        // ==========================================
+        // CONTENTFUL API SETUP - PASTE YOUR KEYS HERE
+        // ==========================================
+        const SPACE_ID = 'guwiw3f81shk'; // Image mein aapka space ID URL mein dikh raha hai
+        const ACCESS_TOKEN = 'MaRT24JyPHiRR7cbc7Mq0L8kUHUOHsN9__Ot1fHqGZs'; // Settings > API Keys se layein
+        
+        async function fetchPosts() {
+            const url = `https://cdn.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${ACCESS_TOKEN}&content_type=blogPost&order=-sys.createdAt`;
+            const grid = document.getElementById('blog-grid');
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                grid.innerHTML = ''; // Clear loading text
+
+                if (!data.items || data.items.length === 0) {
+                    grid.innerHTML = '<p style="color:#fff; grid-column:1/-1; text-align:center;">No blog posts published yet.</p>';
+                    return;
+                }
+
+                // Helper to find image URL from Contentful's Assets
+                const getImageUrl = (imageId) => {
+                    if(!data.includes || !data.includes.Asset) return '';
+                    const asset = data.includes.Asset.find(a => a.sys.id === imageId);
+                    return asset ? 'https:' + asset.fields.file.url : '';
+                };
+
+                data.items.forEach(item => {
+                    const fields = item.fields;
+                    // Get image URL
+                    const imageId = fields.image && fields.image.sys ? fields.image.sys.id : null;
+                    const imageUrl = imageId ? getImageUrl(imageId) : 'https://images.unsplash.com/photo-1558494949-ef248ac84f83?q=80&w=800'; // Fallback image
+
+                    // Format Date
+                    const dateObj = new Date(fields.date || item.sys.createdAt);
+                    const formattedDate = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
+                    grid.innerHTML += `
+                        <article class="card">
+                            <a href="/blog/${fields.slug}" class="card-img-wrapper">
+                                <img src="${imageUrl}" alt="${fields.title}">
+                            </a>
+                            <div class="card-content">
+                                <span class="tag">${fields.tag || 'Updates'}</span>
+                                <a href="/blog/${fields.slug}">
+                                    <h2>${fields.title}</h2>
+                                </a>
+                                <p>${fields.summary}</p>
+                                <div class="card-footer">
+                                    <span>${formattedDate}</span>
+                                    <a href="/blog/${fields.slug}" class="read-link">Read more →</a>
+                                </div>
+                            </div>
+                        </article>
+                    `;
+                });
+            } catch (error) {
+                console.error("Contentful Error:", error);
+                grid.innerHTML = '<p style="color:red; text-align:center; grid-column:1/-1;">Error loading articles. Check API Keys.</p>';
+            }
+        }
+
+        fetchPosts();
+    </script>
+</body>
+</html>
+
+
