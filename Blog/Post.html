@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post | GitDelivr</title>
+    <meta name="description" content="Loading article...">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+    <style>
+        /* --- THEME COLORS --- */
+        :root { --bg-main: #0B1121; --bg-card: #151e32; --bg-footer: #020617; --primary-blue: #2563EB; --text-white: #ffffff; --text-gray: #94A3B8; --text-body: #cbd5e1; --border-color: #1E293B; }
+        * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+        body { font-family: 'Inter', sans-serif; background-color: var(--bg-main); color: var(--text-body); line-height: 1.8; }
+        a { text-decoration: none; color: inherit; transition: 0.2s; }
+        h1, h2, h3 { color: var(--text-white); margin-bottom: 1rem; line-height: 1.3; }
+        img { max-width: 100%; border-radius: 8px; }
+
+        /* NAVBAR */
+        header { background-color: rgba(11, 17, 33, 0.95); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid var(--border-color); padding: 1rem 0; }
+        .nav-container { max-width: 1200px; margin: 0 auto; padding: 0 24px; display: flex; justify-content: space-between; align-items: center; position: relative; }
+        .logo { font-size: 1.5rem; font-weight: 700; color: white; letter-spacing: -0.5px; }
+        .nav-links { display: flex; gap: 32px; align-items: center; }
+        .nav-links a { font-size: 0.95rem; font-weight: 500; color: var(--text-gray); }
+        .nav-links a:hover { color: white; }
+        .menu-btn { display: none; color: white; font-size: 1.5rem; cursor: pointer; }
+        @media (max-width: 768px) { .menu-btn { display: block; } .nav-links { display: none; position: absolute; top: 100%; left: 0; width: 100%; background-color: var(--bg-main); border-bottom: 1px solid var(--border-color); flex-direction: column; align-items: flex-start; padding: 20px; gap: 20px; z-index: 999; } .nav-links.active { display: flex; } .nav-links a { width: 100%; display: block; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); } }
+
+        /* ARTICLE LAYOUT */
+        .article-container { max-width: 800px; margin: 0 auto; padding: 60px 24px 100px; }
+        .back-link { display: inline-flex; align-items: center; gap: 6px; color: var(--primary-blue); font-weight: 500; font-size: 0.9rem; margin-bottom: 24px; }
+        .post-meta { display: flex; align-items: center; gap: 16px; font-size: 0.9rem; color: var(--text-gray); margin-bottom: 20px; }
+        .tag { background: rgba(37, 99, 235, 0.15); color: var(--primary-blue); padding: 4px 10px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+        .post-title { font-size: 2.5rem; font-weight: 800; margin-bottom: 16px; letter-spacing: -1px; }
+        .post-hero-image { width: 100%; height: 400px; object-fit: cover; border-radius: 12px; margin-bottom: 50px; background: var(--bg-card); }
+
+        /* CONTENT & ADS */
+        .ad-container { background: #161b22; border: 1px dashed #30363d; padding: 20px; text-align: center; margin: 40px 0; border-radius: 8px; min-height: 120px; display: flex; align-items: center; justify-content: center; }
+        .content { font-size: 1.125rem; }
+        .content h2 { font-size: 1.8rem; margin-top: 3rem; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        .content pre { background: #0f1524; padding: 20px; border-radius: 8px; overflow-x: auto; border: 1px solid var(--border-color); margin-bottom: 2rem; }
+        .content code { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; color: #e2e8f0; }
+
+        /* FOOTER */
+        footer { background-color: var(--bg-footer); padding: 40px 0 20px; border-top: 1px solid var(--border-color); text-align: center; color: #64748b; font-size: 0.9rem; }
+        
+        @media (max-width: 768px) { .post-title { font-size: 1.8rem; } .post-hero-image { height: 250px; } }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="nav-container">
+            <a href="/" class="logo">GitDelivr</a>
+            <div class="menu-btn" onclick="toggleMenu()">☰</div>
+            <nav class="nav-links" id="navLinks">
+                <a href="#">Tool</a>
+                <a href="#">Features</a>
+                <a href="/blog" style="color:white;">Blog</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="article-container">
+        <a href="/blog" class="back-link">← Back to Blog</a>
+        <div id="post-content">
+            <div style="text-align:center; padding:50px; color:#64748b;">Fetching article...</div>
+        </div>
+    </main>
+
+    <footer>
+        <p>© 2025 GitDelivr. All rights reserved.</p>
+    </footer>
+
+    <script>
+        function toggleMenu() { document.getElementById('navLinks').classList.toggle('active'); }
+
+        // ==========================================
+        // CONTENTFUL API SETUP 
+        // ==========================================
+        const SPACE_ID = 'guwiw3f81shk'; 
+        const ACCESS_TOKEN = 'YOUR_CONTENT_DELIVERY_API_TOKEN';
+        
+        // URL se Slug nikalein (e.g., /blog/my-post -> my-post)
+        const currentSlug = window.location.pathname.split('/').pop();
+
+        async function fetchSinglePost() {
+            // Contentful API jahan hum directly Slug match kar rahe hain
+            const url = `https://cdn.contentful.com/spaces/${SPACE_ID}/environments/master/entries?access_token=${ACCESS_TOKEN}&content_type=blogPost&fields.slug=${currentSlug}`;
+            const container = document.getElementById('post-content');
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (!data.items || data.items.length === 0) {
+                    container.innerHTML = `<h1>404</h1><p>Article not found.</p><a href="/blog" style="color:#2563EB">Go Back</a>`;
+                    return;
+                }
+
+                // Get the first matching item
+                const item = data.items[0];
+                const fields = item.fields;
+
+                // Helper to find image URL
+                const getImageUrl = (imageId) => {
+                    if(!data.includes || !data.includes.Asset) return '';
+                    const asset = data.includes.Asset.find(a => a.sys.id === imageId);
+                    return asset ? 'https:' + asset.fields.file.url : '';
+                };
+
+                const imageId = fields.image && fields.image.sys ? fields.image.sys.id : null;
+                const imageUrl = imageId ? getImageUrl(imageId) : '';
+                
+                const dateObj = new Date(fields.date || item.sys.createdAt);
+                const formattedDate = dateObj.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+
+                // Generate HTML with AdSense Blocks
+                let html = `
+                    <header class="post-header" style="text-align:left; margin-bottom:40px;">
+                        <div class="post-meta"><span class="tag">${fields.tag || 'Blog'}</span><span>${formattedDate}</span></div>
+                        <h1 class="post-title">${fields.title}</h1>
+                    </header>
+                `;
+
+                if(imageUrl) {
+                    html += `<img src="${imageUrl}" alt="${fields.title}" class="post-hero-image">`;
+                }
+
+                html += `
+                    <div class="ad-container"><span style="color:#555; font-size:12px;">Google AdSense Space</span></div>
+                    <div class="content">${marked.parse(fields.body)}</div>
+                    <div class="ad-container"><span style="color:#555; font-size:12px;">Google AdSense Space</span></div>
+                `;
+
+                container.innerHTML = html;
+
+                // --- UPDATE SEO METADATA ---
+                document.title = fields.title + " | GitDelivr";
+                let metaDesc = document.querySelector('meta[name="description"]');
+                if (fields.summary) {
+                    metaDesc.setAttribute("content", fields.summary);
+                }
+
+            } catch (error) {
+                console.error("Error:", error);
+                container.innerHTML = `<p style="color:red">Failed to load content.</p>`;
+            }
+        }
+
+        fetchSinglePost();
+    </script>
+</body>
+</html>
+
+
+
