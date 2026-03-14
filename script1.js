@@ -7,7 +7,6 @@ import {
     signInWithEmailAndPassword, 
     signOut, 
     onAuthStateChanged, 
-    sendEmailVerification,
     sendPasswordResetEmail, 
     signInWithPopup, 
     GithubAuthProvider, 
@@ -20,7 +19,7 @@ import {
     fetchSignInMethodsForEmail,
     getAdditionalUserInfo
 } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-import { getFirestore, getDoc, doc, onSnapshot, addDoc, collection, serverTimestamp, setDoc, increment, deleteDoc, orderBy, query, Timestamp, limit, where, updateDoc, writeBatch, getDocs, getCountFromServer } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, doc, onSnapshot, addDoc, collection, serverTimestamp, setDoc, increment, deleteDoc, orderBy, query, Timestamp, limit, where, updateDoc, writeBatch, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-messaging.js";
 import emailjs from 'https://cdn.jsdelivr.net/npm/@emailjs/browser@4/+esm';
 // --- Global State ---
@@ -258,11 +257,7 @@ async function connectGithubAccount() {
         
         console.log("GitHub account successfully linked!", result);
         hideLoginLoading();
-        
-        const profile = result.user.providerData.find(p => p.providerId === 'github.com');
-        const additionalInfo = getAdditionalUserInfo(result);
-        const githubUsername = additionalInfo?.username || 'N/A';
-        alert(`Your GitHub account has been connected!\n\nName: ${profile?.displayName || 'N/A'}\nUsername: @${githubUsername}\nID: ${profile?.uid || 'N/A'}\nEmail: ${profile?.email || 'N/A'}`);
+        alert("Your GitHub account has been connected!");
         
         // Refresh UI state by re-fetching repos
         fetchGitHubRepos(user);
@@ -759,13 +754,11 @@ async function fetchGitHubRepos(user) {
     
     const providers = getLinkedProviderState(user);
     let githubUsername = "";
-    let githubProfile = null;
 
     if (providers.isGithubLinked) {
         // Find the GitHub provider data to get the username
         const githubProviderData = user.providerData.find(p => p.providerId === 'github.com');
         if (githubProviderData) {
-            githubProfile = githubProviderData;
             // The screenName is often available in reloadUserInfo for GitHub
             githubUsername = user.reloadUserInfo?.screenName || githubProviderData.email.split('@')[0];
         }
@@ -773,59 +766,10 @@ async function fetchGitHubRepos(user) {
 
     if (githubUsername) {
         githubConnectOption.classList.add('hidden');
-        
-        let detailsDiv = document.getElementById('githubAccountDetails');
-        if (!detailsDiv) {
-            detailsDiv = document.createElement('div');
-            detailsDiv.id = 'githubAccountDetails';
-            detailsDiv.className = "bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl p-4 mb-6 flex flex-col sm:flex-row items-center gap-4 animate-fade-in-up";
-            repoList.parentNode.insertBefore(detailsDiv, repoList);
-        }
-        detailsDiv.innerHTML = `
-            <div class="flex items-center gap-3 w-full">
-                <img src="${githubProfile?.photoURL}" class="w-10 h-10 rounded-full border border-slate-300 dark:border-slate-600">
-                <div class="flex-1 min-w-0">
-                    <p class="font-bold text-sm text-slate-800 dark:text-white truncate">${githubProfile?.displayName || githubUsername}</p>
-                    <div class="flex flex-col sm:flex-row sm:gap-3 text-xs text-slate-500">
-                        <span class="font-mono">@${githubUsername}</span>
-                        <span class="hidden sm:inline">•</span>
-                        <span class="font-mono">ID: ${githubProfile?.uid}</span>
-                        <span class="hidden sm:inline">•</span>
-                        <span class="truncate">${githubProfile?.email}</span>
-                    </div>
-                </div>
-                <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-md whitespace-nowrap">Connected</span>
-            </div>`;
-        detailsDiv.classList.remove('hidden');
-
         repoList.innerHTML = `<p class="text-sm text-slate-500 animate-pulse col-span-2">Fetching Repositories...</p>`;
         
         try {
-            let headers = {};
-            try {
-                // Attempt to fetch the stored GitHub token to increase rate limits (60 -> 5000 req/hr)
-                const tokenSnap = await getDoc(doc(db, 'users', user.uid, 'private', 'tokens'));
-                if (tokenSnap.exists() && tokenSnap.data().githubAccessToken) {
-                    headers.Authorization = `token ${tokenSnap.data().githubAccessToken}`;
-                }
-            } catch (e) { console.warn("Could not retrieve GitHub token:", e); }
-
-            let repoApiUrl = `https://api.github.com/users/${githubUsername}/repos?sort=updated&per_page=12`;
-            
-            // Use authenticated endpoint if token is present to avoid username guessing errors (404)
-            if (headers.Authorization) {
-                repoApiUrl = `https://api.github.com/user/repos?sort=updated&per_page=12&affiliation=owner`;
-            }
-
-            let res = await fetch(repoApiUrl, { headers });
-            
-            // If the token is invalid (401), retry without the header to fetch public repos
-            if (res.status === 401 && headers.Authorization) {
-                console.warn("Stored GitHub token appears invalid. Retrying request without token.");
-                res = await fetch(`https://api.github.com/users/${githubUsername}/repos?sort=updated&per_page=12`);
-            }
-
-            if (!res.ok) throw new Error(res.status === 403 ? "Rate limit exceeded" : `Failed to load (${res.status})`);
+            const res = await fetch(`https://api.github.com/users/${githubUsername}/repos?sort=updated&per_page=12`);
             const repos = await res.json();
             
             repoList.innerHTML = "";
@@ -839,11 +783,8 @@ async function fetchGitHubRepos(user) {
                 `;
             });
         } catch (e) {
-            repoList.innerHTML = `<p class="text-red-500 text-sm col-span-2">Could not load repos. ${e.message}</p>`;
+            repoList.innerHTML = `<p class="text-red-500 text-sm col-span-2">Could not load repos. Rate limit exceeded.</p>`;
         }
-    } else {
-        const detailsDiv = document.getElementById('githubAccountDetails');
-        if(detailsDiv) detailsDiv.classList.add('hidden');
     }
 }
 
@@ -940,60 +881,8 @@ async function initAuth() {
         setupNotificationSystem();
         initNotificationsPage();
         initMessaging(); // Initialize FCM
-        fetchHomeStats();
     } catch (e) {
         console.error("Auth init failed", e);
-    }
-}
-
-// --- Home Page Statistics Logic ---
-async function fetchHomeStats() {
-    const usersEl = document.getElementById('homeTotalUsers');
-    const trafficEl = document.getElementById('homeTotalTraffic');
-    const ratingEl = document.getElementById('homeAvgRating');
-    
-    if (!usersEl && !trafficEl && !ratingEl) return;
-
-    try {
-        // 1. Fetch Total Users using Aggregation Query (Fast & Cheap)
-        if (usersEl) {
-            const usersSnap = await getCountFromServer(collection(db, 'users'));
-            const userCount = usersSnap.data().count;
-            usersEl.innerText = userCount.toLocaleString() + "+";
-            usersEl.classList.remove('animate-pulse');
-        }
-
-        // 2. Fetch Total Traffic (sum of 'views' across all daily docs in site_stats)
-        if (trafficEl) {
-            const statsSnap = await getDocs(collection(db, 'site_stats'));
-            let traffic = 0;
-            statsSnap.forEach(doc => { traffic += (doc.data().views || 0); });
-            
-            // Format traffic nicely (e.g., 1.2k+, 15k+)
-            if (traffic >= 1000) {
-                trafficEl.innerText = (traffic / 1000).toFixed(1) + "k+";
-            } else {
-                trafficEl.innerText = traffic.toLocaleString() + "+";
-            }
-            trafficEl.classList.remove('animate-pulse');
-        }
-
-        // 3. Fetch Average Rating from Reviews
-        if (ratingEl) {
-            const reviewsSnap = await getDocs(collection(db, 'reviews'));
-            let totalRating = 0, count = 0;
-            reviewsSnap.forEach(doc => { totalRating += (doc.data().rating || 0); count++; });
-            
-            const avg = count > 0 ? (totalRating / count).toFixed(1) : "5.0";
-            ratingEl.innerText = avg + " / 5";
-            ratingEl.classList.remove('animate-pulse');
-        }
-    } catch (e) {
-        console.error("Error fetching home stats:", e);
-        // Graceful fallback UI in case of permission/network errors
-        if (usersEl) { usersEl.innerText = "500+"; usersEl.classList.remove('animate-pulse'); }
-        if (trafficEl) { trafficEl.innerText = "10k+"; trafficEl.classList.remove('animate-pulse'); }
-        if (ratingEl) { ratingEl.innerText = "4.9 / 5"; ratingEl.classList.remove('animate-pulse'); }
     }
 }
 
@@ -1105,16 +994,7 @@ async function enableMessaging(messaging) {
             return;
         }
 
-        let serviceWorkerRegistration = null;
-        if ('serviceWorker' in navigator) {
-            try {
-                serviceWorkerRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-            } catch (err) {
-                console.error('Service Worker registration failed:', err);
-            }
-        }
-
-        const token = await getToken(messaging, { vapidKey: VAPID_KEY, serviceWorkerRegistration });
+        const token = await getToken(messaging, { vapidKey: VAPID_KEY });
         if (token) {
             console.log("FCM Token:", token);
             if (auth.currentUser) {
@@ -1230,15 +1110,9 @@ function setupAuthListeners() {
                 delete document.body.dataset.primaryProvider;
             }
             
-            // Ensure admin maintenance bypass is cleared on logout
-            localStorage.removeItem('adminAuth');
-
             // Sidebar Reset
             if(document.getElementById('sideName')) document.getElementById('sideName').innerText = "Guest";
             if(document.getElementById('sideEmail')) document.getElementById('sideEmail').innerText = "Click to Login";
-            
-            const detailsDiv = document.getElementById('githubAccountDetails');
-            if(detailsDiv) detailsDiv.classList.add('hidden');
 
             const repoList = document.getElementById('repoList');
             if (repoList) {
@@ -1291,23 +1165,9 @@ function setupAuthListeners() {
     if(btnEmailLogin) btnEmailLogin.onclick = async () => {
         const email = document.getElementById('authEmail').value;
         const pass = document.getElementById('authPass').value;
-        const unverifiedAlert = document.getElementById('unverifiedAlert');
-        if (unverifiedAlert) unverifiedAlert.classList.add('hidden');
-
         showLoginLoading("Logging in...");
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-
-                if (!userCredential.user.emailVerified) {
-                    await signOut(auth);
-                    hideLoginLoading();
-                    if (unverifiedAlert) {
-                        unverifiedAlert.classList.remove('hidden');
-                    } else {
-                        alert("Please verify your email address before logging in.");
-                    }
-                    return;
-                }
 
             if (pendingCredentialForLinking) {
                 showLoginLoading("Linking GitHub account...");
@@ -1336,97 +1196,27 @@ function setupAuthListeners() {
             const res = await createUserWithEmailAndPassword(auth, email, pass);
             await updateProfile(res.user, { displayName: name });
             await saveUserData(res.user);
-            
-            await sendEmailVerification(res.user);
-            await signOut(auth);
-            
             hideLoginLoading();
-            alert("Account created successfully! Please check your email to verify your account before logging in.");
-            window.toggleView('loginView');
+            if(typeof closeModal === 'function') closeModal('loginModal');
         } catch(e) { 
             hideLoginLoading();
             alert(e.message); 
         }
     };
 
-    // Resend Verification Email logic
-    const btnResendVerification = document.getElementById('btnResendVerification');
-    if (btnResendVerification) {
-        btnResendVerification.onclick = async () => {
-            const email = document.getElementById('authEmail').value;
-            const pass = document.getElementById('authPass').value;
-            if (!email || !pass) return alert("Please enter your email and password to resend the link.");
-            
-            showLoginLoading("Sending verification link...");
-            try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, pass);
-                await sendEmailVerification(userCredential.user);
-                await signOut(auth);
-                hideLoginLoading();
-                document.getElementById('unverifiedAlert')?.classList.add('hidden');
-                alert("Verification email sent! Please check your inbox and spam folder.");
-            } catch (e) {
-                hideLoginLoading();
-                alert("Failed to send verification email: " + e.message);
-            }
-        };
-    }
-
     // Forgot Password (User Side)
     const btnResetPass = document.getElementById('btnResetPass');
     if(btnResetPass) {
         btnResetPass.addEventListener('click', async () => {
-            const emailInput = document.getElementById('resetEmail');
-            const email = emailInput.value.trim();
-            const spinner = document.getElementById('forgotSpinner');
-            const btnText = document.getElementById('forgotBtnText');
-            const statusMessage = document.getElementById('forgotStatusMessage');
-            
+            const email = document.getElementById('resetEmail').value.trim();
             if (!email) return alert("Please enter your email first!");
-
-            const showStatus = (msg, isError) => {
-                statusMessage.textContent = msg;
-                statusMessage.className = `rounded-lg p-3 text-sm font-medium border mb-4 text-left transition-all duration-300 ${
-                    isError 
-                    ? 'bg-red-500/10 text-red-500 border-red-500/20' 
-                    : 'bg-green-500/10 text-green-500 border-green-500/20'
-                }`;
-                statusMessage.classList.remove('hidden');
-            };
-
-            statusMessage.classList.add('hidden');
-            btnResetPass.disabled = true;
-            emailInput.disabled = true;
-            spinner.classList.remove('hidden');
-            btnText.textContent = 'Verifying...';
-
-            let isSuccess = false;
-
+            showLoginLoading("Sending reset link...");
             try {
-                const usersRef = collection(db, "users");
-                const q = query(usersRef, where("email", "==", email));
-                const querySnapshot = await getDocs(q);
-
-                if (querySnapshot.empty) {
-                    showStatus('This email is not registered with us. Please check for typos or sign up.', true);
-                } else {
-                    btnText.textContent = 'Sending...';
-                    await sendPasswordResetEmail(auth, email);
-                    showStatus('Reset link sent! Please check your inbox (and spam folder).', false);
-                    isSuccess = true;
-                    btnText.textContent = 'Link Sent';
-                }
-            } catch (error) {
-                console.error("Forgot password error:", error);
-                showStatus('An error occurred. Please try again later.', true);
-            } finally {
-                spinner.classList.add('hidden');
-                if (!isSuccess) {
-                    btnResetPass.disabled = false;
-                    emailInput.disabled = false;
-                    btnText.textContent = 'Send Reset Link';
-                }
-            }
+                await sendPasswordResetEmail(auth, email);
+                hideLoginLoading();
+                alert("Password reset link sent!");
+                window.toggleView('loginView');
+            } catch (error) { alert(error.message); }
         });
     }
 }
@@ -1449,10 +1239,8 @@ async function saveUserData(user) {
 window.logout = () => signOut(auth).then(() => location.reload());
 
 function listenForMaintenanceMode() {
-    const overlay = document.getElementById('maintenanceOverlay');
-    if (!overlay) return;
-
     const settingsRef = doc(db, 'settings', 'config');
+    const overlay = document.getElementById('maintenanceOverlay');
     const msgEl = document.getElementById('maintenanceMessage');
     let maintenanceTimeout;
 
@@ -1465,7 +1253,7 @@ function listenForMaintenanceMode() {
         if (maintenanceTimeout) clearTimeout(maintenanceTimeout);
 
         // Check Schedule
-        if (!isMaintenance && data.scheduledStart && typeof data.scheduledStart.toDate === 'function') {
+        if (!isMaintenance && data.scheduledStart) {
             const start = data.scheduledStart.toDate();
             const now = new Date();
             if (now >= start) {
@@ -1638,8 +1426,7 @@ function setupNotificationSystem() {
     onAuthStateChanged(auth, (user) => {
         if (user && list) {
             let allNotifications = [];
-            // Removed orderBy to prevent missing index error. Sorting is done client-side.
-            const q = query(collection(db, 'notifications'), where('userId', '==', user.uid), limit(50));
+            const q = query(collection(db, 'notifications'), where('userId', '==', user.uid), orderBy('timestamp', 'desc'), limit(50));
             let isFirstLoad = true;
             
             onSnapshot(q, (snapshot) => {
@@ -1665,9 +1452,6 @@ function setupNotificationSystem() {
                     if (!data.read) unreadCount++;
                 });
                 
-                // Client-side sort
-                notifs.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-
                 allNotifications = notifs;
 
                 // Update Badge
@@ -1698,26 +1482,15 @@ function setupNotificationSystem() {
             const time = n.timestamp ? new Date(n.timestamp.seconds * 1000).toLocaleDateString() : 'Just now';
             const bgClass = n.read ? 'bg-white dark:bg-slate-800' : 'bg-blue-50 dark:bg-blue-900/20';
             list.innerHTML += `
-                <div class="p-3 ${bgClass} hover:bg-gray-50 dark:hover:bg-slate-700 transition cursor-pointer border-b border-slate-100 dark:border-slate-700/50 relative group" onclick="window.markRead('${n.id}')">
-                    <div class="pr-6">
-                        <p class="text-sm text-slate-800 dark:text-slate-200">${n.message}</p>
-                        <p class="text-[10px] text-slate-400 mt-1 text-right">${time}</p>
-                    </div>
-                    <button onclick="window.deleteNotification('${n.id}', event)" class="absolute top-2 right-2 text-slate-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity p-1" title="Delete">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                    </button>
+                <div class="p-3 ${bgClass} hover:bg-gray-50 dark:hover:bg-slate-700 transition cursor-pointer border-b border-slate-100 dark:border-slate-700/50" onclick="window.markRead('${n.id}')">
+                    <p class="text-sm text-slate-800 dark:text-slate-200">${n.message}</p>
+                    <p class="text-[10px] text-slate-400 mt-1 text-right">${time}</p>
                 </div>
             `;
         });
     }
 
     window.markRead = async (id) => { await updateDoc(doc(db, 'notifications', id), { read: true }); };
-    window.deleteNotification = async (id, event) => {
-        if(event) event.stopPropagation();
-        if(confirm("Delete this notification?")) {
-            try { await deleteDoc(doc(db, 'notifications', id)); } catch(e) { console.error(e); }
-        }
-    };
     window.markAllRead = async () => {
         if(!auth.currentUser) return;
         const batch = writeBatch(db);
@@ -1733,130 +1506,33 @@ function initNotificationsPage() {
     const listContainer = document.getElementById('allNotificationsList');
     if (!listContainer) return; // Only run on notifications.html
 
-    // Bulk Actions State
-    let selectedNotifIds = new Set();
-    let currentNotifIds = [];
-    
-    const selectAllCheckbox = document.getElementById('selectAllNotifs');
-    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
-    const bulkSelectContainer = document.getElementById('bulkSelectContainer');
-
-    // UI Updater
-    const updateBulkUI = () => {
-        if (selectedNotifIds.size > 0) {
-            if(deleteSelectedBtn) {
-                deleteSelectedBtn.classList.remove('hidden');
-                deleteSelectedBtn.innerText = `Delete Selected (${selectedNotifIds.size})`;
-            }
-        } else {
-            if(deleteSelectedBtn) deleteSelectedBtn.classList.add('hidden');
-        }
-        
-        if(selectAllCheckbox) {
-            if (currentNotifIds.length > 0 && currentNotifIds.every(id => selectedNotifIds.has(id))) {
-                selectAllCheckbox.checked = true;
-                selectAllCheckbox.indeterminate = false;
-            } else if (selectedNotifIds.size > 0) {
-                selectAllCheckbox.checked = false;
-                selectAllCheckbox.indeterminate = true;
-            } else {
-                selectAllCheckbox.checked = false;
-                selectAllCheckbox.indeterminate = false;
-            }
-        }
-    };
-
-    // Toggle Handler
-    window.toggleNotifSelection = (id) => {
-        if (selectedNotifIds.has(id)) selectedNotifIds.delete(id);
-        else selectedNotifIds.add(id);
-        updateBulkUI();
-    };
-
-    // Select All Listener
-    if (selectAllCheckbox) {
-        selectAllCheckbox.addEventListener('change', (e) => {
-            const checked = e.target.checked;
-            if (checked) currentNotifIds.forEach(id => selectedNotifIds.add(id));
-            else selectedNotifIds.clear();
-            document.querySelectorAll('.notif-checkbox').forEach(cb => cb.checked = checked);
-            updateBulkUI();
-        });
-    }
-
-    // Delete Selected Listener
-    if (deleteSelectedBtn) {
-        deleteSelectedBtn.addEventListener('click', async () => {
-            if (selectedNotifIds.size === 0) return;
-            if (confirm(`Delete ${selectedNotifIds.size} notifications?`)) {
-                const batch = writeBatch(db);
-                selectedNotifIds.forEach(id => {
-                    batch.delete(doc(db, 'notifications', id));
-                });
-                try {
-                    await batch.commit();
-                    selectedNotifIds.clear();
-                    updateBulkUI();
-                } catch (e) {
-                    console.error("Error deleting:", e);
-                    alert("Failed to delete notifications.");
-                }
-            }
-        });
-    }
-
     onAuthStateChanged(auth, (user) => {
         if (user) {
-            // Removed orderBy to prevent missing index error. Sorting is done client-side.
-            const q = query(collection(db, 'notifications'), where('userId', '==', user.uid));
+            const q = query(collection(db, 'notifications'), where('userId', '==', user.uid), orderBy('timestamp', 'desc'));
             onSnapshot(q, (snapshot) => {
                 if (snapshot.empty) {
                     listContainer.innerHTML = '<p class="text-center text-slate-500 text-xs py-8">You have no notifications.</p>';
-                    if(bulkSelectContainer) bulkSelectContainer.classList.add('hidden');
                     return;
                 }
-                if(bulkSelectContainer) bulkSelectContainer.classList.remove('hidden');
 
-                const notifList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                // Client-side sort
-                notifList.sort((a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-                
-                currentNotifIds = notifList.map(n => n.id);
-                
-                // Filter out stale IDs
-                const availableIds = new Set(currentNotifIds);
-                for (let id of selectedNotifIds) { if (!availableIds.has(id)) selectedNotifIds.delete(id); }
-
-                const notifHtml = notifList.map(n => {
+                const notifHtml = snapshot.docs.map(doc => {
+                    const n = { id: doc.id, ...doc.data() };
                     const time = n.timestamp ? new Date(n.timestamp.seconds * 1000).toLocaleString() : 'Just now';
                     const bgClass = n.read ? 'bg-white dark:bg-slate-800' : 'bg-blue-50 dark:bg-blue-900/20';
                     const borderClass = n.read ? 'border-slate-200 dark:border-slate-700' : 'border-blue-200 dark:border-blue-800';
-                    const isChecked = selectedNotifIds.has(n.id) ? 'checked' : '';
                     
                     return `
-                        <div class="p-4 rounded-lg ${bgClass} border ${borderClass} flex items-center transition cursor-pointer relative group gap-3" onclick="window.markRead('${n.id}')">
-                            <input type="checkbox" class="notif-checkbox w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 shrink-0 cursor-pointer" 
-                                value="${n.id}" 
-                                ${isChecked}
-                                onchange="window.toggleNotifSelection('${n.id}')"
-                                onclick="event.stopPropagation()">
-                            
-                            <div class="flex-1 pr-4">
+                        <div class="p-4 rounded-lg ${bgClass} border ${borderClass} flex justify-between items-center transition cursor-pointer" onclick="window.markRead('${n.id}')">
+                            <div>
                                 <p class="text-sm text-slate-800 dark:text-slate-200">${n.message}</p>
                                 <p class="text-xs text-slate-400 mt-1">${time}</p>
                             </div>
-                            <div class="flex items-center gap-3">
-                                ${!n.read ? '<div class="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 animate-pulse"></div>' : ''}
-                                <button onclick="window.deleteNotification('${n.id}', event)" class="p-2 text-slate-400 hover:text-red-500 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors opacity-0 group-hover:opacity-100" title="Delete">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </div>
+                            ${!n.read ? '<div class="w-2 h-2 bg-blue-500 rounded-full flex-shrink-0 ml-4 animate-pulse"></div>' : ''}
                         </div>
                     `;
                 }).join('');
 
                 listContainer.innerHTML = notifHtml;
-                updateBulkUI();
 
             }, (error) => {
                 console.error("Error fetching notifications on page:", error);
@@ -2072,7 +1748,6 @@ if (contactForm) {
             name: document.getElementById('contactName').value,
             email: document.getElementById('contactEmail').value,
             message: document.getElementById('contactMessage').value,
-            userId: auth.currentUser ? auth.currentUser.uid : null,
             timestamp: serverTimestamp()
         };
 
@@ -2157,68 +1832,70 @@ document.addEventListener('DOMContentLoaded', () => {
 // =======================================================
 
 function initAdminPage() {
-    const googleLoginBtn = document.getElementById('adminGoogleLoginBtn');
-    if (!googleLoginBtn) return; // Exit if not on admin page
+    const loginBtn = document.getElementById('loginBtn');
+    if (!loginBtn) return; // Exit if not on admin page
 
     const loginOverlay = document.getElementById('loginOverlay');
     const dashboard = document.getElementById('dashboard');
+    const emailInput = document.getElementById('adminEmail');
+    const passInput = document.getElementById('adminPass');
+    const forgotBtn = document.getElementById('forgotPasswordBtn');
     const logoutBtn = document.getElementById('logoutBtn');
+    const maintenanceToggle = document.getElementById('maintenanceToggle');
 
     let dataInitialized = false;
 
     // Monitor Auth State
     onAuthStateChanged(auth, (user) => {
-        if (user && !user.isAnonymous && user.email === 'anuraggautam4570@gmail.com') {
-            // User is the correct admin
+        if (user && !user.isAnonymous) {
+            // User is logged in as admin
             localStorage.setItem('adminAuth', 'true');
             if(loginOverlay) loginOverlay.classList.add('hidden');
             if(dashboard) dashboard.classList.remove('hidden');
-
-            // Update Admin UI Details
-            const adminName = document.getElementById('adminNameDisplay');
-            const adminEmail = document.getElementById('adminEmailDisplay');
-            const adminUid = document.getElementById('adminUidDisplay');
-            if(adminName) adminName.innerText = user.displayName || 'Administrator';
-            if(adminEmail) adminEmail.innerText = user.email;
-            if(adminUid) adminUid.innerText = 'ID: ' + user.uid.substring(0, 6) + '...';
-
             if(!dataInitialized) {
                 initData();
                 dataInitialized = true;
             }
         } else {
-            // User is not admin, or is logged out
-            if (user) {
-                // If a user is logged in but it's not the admin, sign them out.
-                signOut(auth);
-            }
+            // User is anonymous or logged out
             localStorage.removeItem('adminAuth');
             if(loginOverlay) loginOverlay.classList.remove('hidden');
             if(dashboard) dashboard.classList.add('hidden');
         }
     });
 
-    googleLoginBtn.addEventListener('click', async () => {
-        const originalText = googleLoginBtn.innerHTML;
-        googleLoginBtn.innerHTML = "Verifying...";
-        googleLoginBtn.disabled = true;
+    loginBtn.addEventListener('click', async () => {
+        const email = emailInput.value;
+        const password = passInput.value;
+        if(!email || !password) return alert("Please enter email and password");
+        
+        const originalText = loginBtn.innerText;
+        loginBtn.innerText = "Verifying...";
+        loginBtn.disabled = true;
 
         try {
-            const result = await signInWithPopup(auth, googleProvider);
-            if (result.user.email !== 'anuraggautam4570@gmail.com') {
-                await signOut(auth);
-                alert("Access Denied. This account is not authorized for admin access.");
-            } else {
-                if("Notification" in window) Notification.requestPermission();
-            }
+            await signInWithEmailAndPassword(auth, email, password);
+            if("Notification" in window) Notification.requestPermission();
         } catch (error) {
             console.error(error);
             alert("Login Failed: " + error.message);
-        } finally {
-            googleLoginBtn.innerHTML = originalText;
-            googleLoginBtn.disabled = false;
+            loginBtn.innerText = originalText;
+            loginBtn.disabled = false;
         }
     });
+
+    if(forgotBtn) {
+        forgotBtn.addEventListener('click', async () => {
+            const email = emailInput.value;
+            if(!email) return alert("Please enter your email address first.");
+            try {
+                await sendPasswordResetEmail(auth, email);
+                alert("Password reset email sent! Check your inbox.");
+            } catch (error) {
+                alert("Error: " + error.message);
+            }
+        });
+    }
 
     if(logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
@@ -2227,7 +1904,6 @@ function initAdminPage() {
         });
     }
 
-    const maintenanceToggle = document.getElementById('maintenanceToggle');
     if(maintenanceToggle) {
         maintenanceToggle.addEventListener('change', async (e) => {
             const isEnabled = e.target.checked;
@@ -2257,27 +1933,11 @@ function initAdminPage() {
     let selectedUserIds = new Set();
     let currentRange = '7d';
 
-    // Enhanced Notification function for Admin Panel
     const notify = (title, body) => {
         if(Notification.permission === 'granted') {
             new Notification(title, { body, icon: 'https://cdn-icons-png.flaticon.com/512/1827/1827301.png' });
+            new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play().catch(()=>{});
         }
-        
-        // Show in-app toast for Admin
-        const toast = document.createElement('div');
-        toast.className = 'fixed top-5 right-5 bg-white dark:bg-slate-800 shadow-2xl rounded-xl p-4 border border-slate-200 dark:border-slate-700 z-[9999] max-w-sm transition-all duration-300 transform translate-x-full opacity-0 flex items-center gap-3';
-        toast.innerHTML = `
-            <div class="bg-blue-100 text-blue-600 p-2 rounded-full"></div>
-            <div>
-                <h4 class="font-bold text-sm text-slate-900 dark:text-white">${title}</h4>
-                <p class="text-xs text-slate-600 dark:text-slate-300 mt-1">${body}</p>
-            </div>
-        `;
-        document.body.appendChild(toast);
-        new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3').play().catch(()=>{});
-        
-        requestAnimationFrame(() => toast.classList.remove('translate-x-full', 'opacity-0'));
-        setTimeout(() => { toast.classList.add('translate-x-full', 'opacity-0'); setTimeout(() => toast.remove(), 300); }, 5000);
     };
 
     async function initData() {
@@ -2291,7 +1951,7 @@ function initAdminPage() {
             
             if(!firstMsg) {
                 snapshot.docChanges().forEach(c => {
-                    if(c.type === 'added') notify('New Message ', `From: ${c.doc.data().name || 'User'}`);
+                    if(c.type === 'added') notify('New Message 📩', `From: ${c.doc.data().name || 'User'}`);
                 });
             }
             firstMsg = false;
@@ -2310,7 +1970,7 @@ function initAdminPage() {
             
             if(!firstSub) {
                 snapshot.docChanges().forEach(c => {
-                    if(c.type === 'added') notify('New Subscriber ', `${c.doc.data().email} joined!`);
+                    if(c.type === 'added') notify('New Subscriber 📰', `${c.doc.data().email} joined!`);
                 });
             }
             firstSub = false;
@@ -2329,7 +1989,7 @@ function initAdminPage() {
             
             if(!firstRev) {
                 snapshot.docChanges().forEach(c => {
-                    if(c.type === 'added') notify('New Review ', `${c.doc.data().rating} stars from ${c.doc.data().name}`);
+                    if(c.type === 'added') notify('New Review ⭐', `${c.doc.data().rating} stars from ${c.doc.data().name}`);
                 });
             }
             firstRev = false;
@@ -2701,11 +2361,7 @@ function initAdminPage() {
         if(data.length === 0) { list.innerHTML = '<p class="text-gray-400 text-center text-sm">No messages found.</p>'; return; }
         data.forEach(d => {
             const date = d.timestamp ? new Date(d.timestamp.seconds * 1000).toLocaleString() : 'Just now';
-            const replyAction = d.userId 
-                ? `<button onclick="window.openReplyModal('${d.userId}', '${d.name || 'User'}')" class="text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 px-3 py-1.5 rounded-lg transition-colors">Reply</button>`
-                : `<a href="mailto:${d.email}?subject=Re: GitDelivr Inquiry" class="text-xs font-medium bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 px-3 py-1.5 rounded-lg transition-colors">Email</a>`;
-
-            list.innerHTML += `<div class="bg-gray-50 dark:bg-slate-700 p-4 rounded-xl border border-gray-100 dark:border-slate-600 relative group hover:shadow-md transition-shadow"><div class="flex justify-between items-start mb-2"><div><h3 class="font-bold text-sm text-slate-800 dark:text-white">${d.name || 'Unknown'}</h3><p class="text-xs text-blue-500">${d.email}</p></div><span class="text-xs text-gray-400">${date}</span></div><p class="text-sm text-gray-600 dark:text-gray-300 mb-3">${d.message}</p><div class="flex justify-end">${replyAction}</div><button onclick="window.deleteItem('messages', '${d.id}')" class="absolute top-3 right-3 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all" title="Delete">🗑️</button></div>`;
+            list.innerHTML += `<div class="bg-gray-50 dark:bg-slate-700 p-4 rounded-xl border border-gray-100 dark:border-slate-600 relative group hover:shadow-md transition-shadow"><div class="flex justify-between items-start mb-2"><div><h3 class="font-bold text-sm text-slate-800 dark:text-white">${d.name || 'Unknown'}</h3><p class="text-xs text-blue-500">${d.email}</p></div><span class="text-xs text-gray-400">${date}</span></div><p class="text-sm text-gray-600 dark:text-gray-300 mb-3">${d.message}</p><div class="flex justify-end"><a href="mailto:${d.email}?subject=Re: GitDelivr Inquiry" class="text-xs font-medium bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-900/50 px-3 py-1.5 rounded-lg transition-colors">Reply</a></div><button onclick="window.deleteItem('messages', '${d.id}')" class="absolute top-3 right-3 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all" title="Delete">🗑️</button></div>`;
         });
     }
 
@@ -2865,15 +2521,6 @@ function initAdminPage() {
         document.getElementById('notificationModal').classList.remove('hidden');
         const title = document.querySelector('#notificationModal h3');
         if(title) title.innerHTML = `<span class="bg-blue-100 text-blue-600 p-2 rounded-lg mr-3 text-lg">🔔</span> Send Notification`;
-    };
-
-    // Admin Reply to Message Logic
-    window.openReplyModal = (uid, name) => {
-        document.getElementById('notifyUserId').value = uid;
-        document.getElementById('notificationModal').classList.remove('hidden');
-        const title = document.querySelector('#notificationModal h3');
-        if(title) title.innerHTML = `<span class="bg-blue-100 text-blue-600 p-2 rounded-lg mr-3 text-lg">↩️</span> Reply to ${name}`;
-        document.getElementById('notifyMessage').value = `Hi ${name},\n\nRegarding your message:\n`;
     };
 
     // --- Confirm Send (Handles Single & Bulk) ---
