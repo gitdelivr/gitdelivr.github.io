@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitDelivr - CDN Generator Dashboard</title>
+    <meta name="description" content="Generate jsDelivr CDN links for GitHub files.">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .hidden { display: none !important; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        .dark ::-webkit-scrollbar-thumb { background: #475569; }
+        .nav-active { background-color: #eff6ff; color: #2563eb; font-weight: 700; border-right: 4px solid #2563eb; }
+        .dark .nav-active { background-color: #1e3a8a; color: #60a5fa; border-color: #60a5fa; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 font-sans h-screen flex overflow-hidden transition-colors duration-300">
+
+    <!-- Maintenance Mode Overlay -->
+    <div id="maintenanceOverlay" class="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[9999] hidden flex-col items-center justify-center text-center p-6">
+        <div class="bg-white dark:bg-slate-800 p-8 rounded-3xl border border-slate-200 dark:border-slate-700 shadow-2xl max-w-md w-full flex flex-col items-center">
+            <div class="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/30 rounded-full flex items-center justify-center mb-6">
+                <svg class="w-8 h-8 text-yellow-600 dark:text-yellow-500 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-2">System Maintenance</h2>
+            <p id="maintenanceMessage" class="mt-6 grid grid-cols-4 gap-4 text-center hidden w-full">
+                <div class="bg-gray-50 dark:bg-slate-700 p-3 rounded-xl border border-gray-100 dark:border-slate-600">
+                    <span id="timerDays" class="block text-2xl font-bold text-blue-600 dark:text-blue-400">00</span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Days</span>
+                </div>
+                <div class="bg-gray-50 dark:bg-slate-700 p-3 rounded-xl border border-gray-100 dark:border-slate-600">
+                    <span id="timerHours" class="block text-2xl font-bold text-blue-600 dark:text-blue-400">00</span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Hours</span>
+                </div>
+                <div class="bg-gray-50 dark:bg-slate-700 p-3 rounded-xl border border-gray-100 dark:border-slate-600">
+                    <span id="timerMinutes" class="block text-2xl font-bold text-blue-600 dark:text-blue-400">00</span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Mins</span>
+                </div>
+                <div class="bg-gray-50 dark:bg-slate-700 p-3 rounded-xl border border-gray-100 dark:border-slate-600">
+                    <span id="timerSeconds" class="block text-2xl font-bold text-blue-600 dark:text-blue-400">00</span>
+                    <span class="text-xs text-slate-500 dark:text-slate-400 uppercase tracking-wide">Secs</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="mobileOverlay" onclick="toggleSidebar()" class="fixed inset-0 bg-slate-900/50 z-40 hidden md:hidden"></div>
+
+    <!-- ========================================== -->
+    <!-- LEFT SIDEBAR -->
+    <!-- ========================================== -->
+    <aside id="sidebar" class="w-72 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 flex flex-col fixed md:relative z-50 h-full transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+        
+        <!-- App Logo & Close (Mobile) -->
+        <div class="h-16 flex items-center justify-between px-6 border-b border-slate-200 dark:border-slate-700 shrink-0">
+            <span class="text-xl font-extrabold tracking-tight text-blue-600 dark:text-blue-400">GitDelivr</span>
+            <button onclick="toggleSidebar()" class="md:hidden text-slate-500 hover:text-slate-800 dark:hover:text-white">✕</button>
+        </div>
+
+        <!-- User Profile (Sidebar) -->
+        <div class="p-2 border-b border-slate-200 dark:border-slate-700 shrink-0 flex items-center space-x-4 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/50 transition" onclick="openLoginIfNotLoggedIn()">
+            <img id="sideAvatar" src="https://ui-avatars.com/api/?name=Guest&background=e2e8f0&color=64748b" class="w-12 h-12 rounded-full border border-slate-300 dark:border-slate-600 object-cover">
+            <div class="overflow-hidden">
+                <h3 id="sideName" class="font-bold text-sm truncate">Guest</h3>
+                <p id="sideEmail" class="text-xs text-slate-500 truncate">Click to Login</p>
+            </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="flex-1 overflow-y-auto py-4">
+            <ul class="space-y-1">
+                <li>
+                    <button onclick="switchTab('tabGenerator', this)" class="nav-btn nav-active w-full text-left px-6 py-3 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700/50 transition flex items-center text-slate-600 dark:text-slate-300">
+                        <span class="mr-3 text-lg"></span> Link Generator
+                    </button>
+                </li>
+                <li>
+                    <button onclick="switchTab('tabRepos', this)" class="nav-btn w-full text-left px-6 py-3 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700/50 transition flex items-center text-slate-600 dark:text-slate-300">
+                        <span class="mr-3 text-lg"></span> GitHub Repos
+                    </button>
+                </li>
+                <li>
+                    <button onclick="switchTab('tabHistory', this); loadHistory();" class="nav-btn w-full text-left px-6 py-3 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700/50 transition flex items-center text-slate-600 dark:text-slate-300">
+                        <span class="mr-3 text-lg"></span> Link History
+                    </button>
+                </li>
+                <li>
+                    <button onclick="switchTab('tabSecurity', this)" class="nav-btn w-full text-left px-6 py-3 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700/50 transition flex items-center text-slate-600 dark:text-slate-300">
+                        <span class="mr-3 text-lg"></span> Password & Security
+                    </button>
+                </li>
+                <li>
+                    <button onclick="switchTab('tabNotifications', this)" class="nav-btn w-full text-left px-6 py-3 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700/50 transition flex items-center text-slate-600 dark:text-slate-300">
+                        <span class="mr-3 text-lg"></span> Notifications
+                    </button>
+                </li>
+                <li>
+                    <button onclick="switchTab('tabTheme', this)" class="nav-btn w-full text-left px-6 py-3 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700/50 transition flex items-center text-slate-600 dark:text-slate-300">
+                        <span class="mr-3 text-lg"></span> Theme Settings
+                    </button>
+                </li>
+                <li>
+                    <button onclick="switchTab('tabContact', this)" class="nav-btn w-full text-left px-6 py-3 text-sm font-medium hover:bg-slate-100 dark:hover:bg-slate-700/50 transition flex items-center text-slate-600 dark:text-slate-300">
+                        <span class="mr-3 text-lg"></span> Contact Support
+                    </button>
+                </li>
+            </ul>
+
+            <!-- Google AdSense Container (Sidebar) -->
+            <div id="adSidebarContainer" class="px-6 py-4 mt-4 hidden rounded-xl transition-colors">
+                <!-- Ad will be injected here -->
+            </div>
+        </nav>
+
+        <!-- Sidebar Footer -->
+        <div class="p-4 border-t border-slate-200 dark:border-slate-700 shrink-0 flex justify-between items-center">
+            <!-- Left Side: Logout Button (Hidden by default, shown by JS) -->
+            <button onclick="logout()" id="btnLogout" class="hidden text-sm font-bold text-red-600 hover:text-red-700 dark:hover:text-red-400 transition flex items-center px-3 py-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                Logout
+            </button>
+            
+            <!-- Right Side: Social Media Links -->
+            <div class="flex items-center space-x-4 ml-auto text-slate-400 dark:text-slate-500">
+                <a href="https://github.com/gitdelivr" target="_blank" aria-label="GitHub" class="hover:text-slate-900 dark:hover:text-white transform hover:scale-110 transition-all duration-200">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" /></svg>
+                </a>
+                 <a href="https://instagram.com/gitdelivr.in" target="_blank" class="text-slate-400 hover:text-slate-800 dark:hover:text-white transition-colors">
+                        <span class="sr-only">Instagram</span>
+                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clip-rule="evenodd" /></svg>
+                    </a>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ========================================== -->
+    <!-- RIGHT MAIN CONTENT AREA -->
+    <!-- ========================================== -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        
+        <!-- Top Header -->
+        <header class="h-16 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 sm:px-8 shrink-0 z-30">
+            <div class="flex items-center">
+                <button onclick="toggleSidebar()" class="md:hidden mr-4 text-slate-600 dark:text-slate-300">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <h1 id="pageTitle" class="text-lg font-bold text-slate-800 dark:text-white">Link Generator</h1>
+            </div>
+
+            <!-- Desktop Navigation -->
+            <div class="hidden md:flex space-x-6 items-center mx-4">
+                <a href="https://gitdelivr.in/cdn_generator.html" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition text-sm">Tool</a>
+                <a href="index.html#features" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition text-sm">Features</a>
+                <a href="index.html#how-it-works" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition text-sm">How It Works</a>
+                <a href="index.html#faq" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition text-sm">FAQ</a>
+                <a href="index.html#contact" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition text-sm">Contact</a>
+                <a href="https://gitdelivr.in/blog/index.html" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition text-sm">Blog</a>
+            </div>
+
+            <!-- Top Right Profile / Login -->
+            <div class="flex items-center">
+                <button id="topLoginBtn" onclick="openModal('loginModal')" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-md transition">
+                    Login
+                </button>
+                
+                <div id="topProfileSection" class="hidden flex items-center gap-3">
+                    <!-- Notification Bell -->
+                    <div class="relative">
+                        <button id="notificationBtn" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition relative">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                            <span id="notificationBadge" class="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+                        </button>
+                        <!-- Notification Dropdown -->
+                        <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden">
+                            <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                                <h3 class="font-bold text-sm text-slate-800 dark:text-white">Notifications</h3>
+                                <button onclick="markAllRead()" class="text-xs text-blue-600 hover:underline">Mark all read</button>
+                            </div>
+                            <div class="p-2 border-b border-slate-100 dark:border-slate-700">
+                                <input type="text" id="searchNotifications" placeholder="Search..." class="w-full bg-slate-100 dark:bg-slate-900 text-sm rounded-md px-2 py-1.5 border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            </div>
+                            <div id="notificationList" class="max-h-64 overflow-y-auto">
+                                <p class="text-center text-slate-500 text-xs py-4">No notifications</p>
+                            </div>
+                            <div class="px-4 py-2 border-t border-slate-100 dark:border-slate-700 text-center bg-slate-50 dark:bg-slate-900/50">
+                                <button onclick="switchTab('tabNotifications', document.querySelectorAll('.nav-btn')[4]); toggleDropdown('notificationDropdown');" class="text-xs font-bold text-blue-600 dark:text-blue-400 hover:underline">View All Notifications</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Profile Dropdown -->
+                    <div class="relative">
+                        <button onclick="toggleDropdown('profileDropdown')" class="flex items-center gap-2 focus:outline-none hover:opacity-80 transition">
+                            <img id="topAvatar" src="https://ui-avatars.com/api/?name=User" class="w-9 h-9 rounded-full border border-blue-500 object-cover shadow-sm">
+                            <svg class="w-4 h-4 text-slate-500 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                        </button>
+                        <div id="profileDropdown" class="hidden absolute right-0 mt-3 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50 py-2">
+                            <div class="px-4 py-2 border-b border-slate-100 dark:border-slate-700">
+                                <p id="dropName" class="font-bold text-sm text-slate-900 dark:text-white truncate">User Name</p>
+                                <p id="dropEmail" class="text-xs text-slate-500 truncate">user@email.com</p>
+                            </div>
+                     <a href="index.html" class="block w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">Go to Home </a>
+
+                            <button onclick="switchTab('tabSecurity', document.querySelectorAll('.nav-btn')[3]); toggleDropdown('profileDropdown');" class="w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">Settings</button>
+                            <button onclick="logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">Logout</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Scrollable Content -->
+        <main class="flex-1 overflow-y-auto p-4 sm:p-8 relative pb-24 flex flex-col">
+            <div class="max-w-4xl mx-auto w-full flex-1">
+                
+                <!-- SECTION: Link Generator (Default) -->
+                <div id="tabGenerator" class="tab-content">
+                    <!-- Main Tool Card -->
+                    <div id="demo" class="bg-white dark:bg-slate-800 shadow-xl rounded-2xl p-6 md:p-8 mb-8 border border-slate-200 dark:border-slate-700">
+                        
+                        <!-- Auto-fill Section -->
+                        <div class="mb-8 bg-blue-50 dark:bg-blue-900/20 p-4 rounded-xl border border-blue-100 dark:border-blue-800/50 transition-all hover:border-blue-300 dark:hover:border-blue-700">
+                            <label for="repoLink" class="block text-sm font-bold text-blue-700 dark:text-blue-300 mb-2 flex items-center">
+                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+                                Quick Auto-Fill
+                            </label>
+                            <input type="text" id="repoLink" 
+                                placeholder="Paste GitHub URL (e.g. https://github.com/user/repo/tree/main)" 
+                                class="w-full p-3 border border-blue-200 dark:border-blue-700 rounded-lg dark:bg-slate-900 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 text-sm transition-shadow"
+                                oninput="parseGitHubUrl(this.value)">
+                        </div>
+
+                        <h2 class="text-lg font-semibold mb-4 text-slate-800 dark:text-white">Repository Details</h2>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                            <div class="form-group">
+                                <label for="user" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Username</label>
+                                <input type="text" id="user" placeholder="e.g., anuxagfr" class="w-full p-3 border border-slate-200 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 text-sm">
+                            </div>
+                            <div class="form-group">
+                                <label for="repo" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Repository</label>
+                                <input type="text" id="repo" placeholder="e.g., my-repo" class="w-full p-3 border border-slate-200 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 text-sm">
+                            </div>
+                            <div class="form-group">
+                                <label for="branch" class="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Branch</label>
+                                <input type="text" id="branch" placeholder="main" value="main" class="w-full p-3 border border-slate-200 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 text-sm">
+                            </div>
+                        </div>
+
+                        <details class="group mb-6">
+                            <summary id="token-details" class="cursor-pointer text-blue-600 dark:text-blue-400 hover:underline text-xs font-medium flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z"></path></svg>
+                                Add Token (Private Repos / High Rate Limit)
+                            </summary>
+                            <div class="form-group pt-3">
+                                <input type="password" id="token" placeholder="ghp_xxxxxxxxxxxx" class="w-full p-3 border border-slate-200 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-slate-200 text-sm">
+                            </div>
+                        </details>
+                        
+                        <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl transition duration-200 shadow-lg shadow-blue-500/30 flex justify-center items-center" onclick="fetchFiles()">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            Fetch Files
+                        </button>
+                        <p id="status-message" class="mt-4 text-center text-sm text-red-500 dark:text-red-400 font-medium"></p>
+
+                        <!-- File Browser Section -->
+                        <div id="file-browser" class="hidden mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
+                            <div class="form-group mb-4 relative">
+                                <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-slate-400">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                </span>
+                                <input type="text" id="search" onkeyup="filterFiles()" placeholder="Filter files..." class="w-full pl-10 p-3 border border-slate-200 dark:border-slate-600 rounded-lg dark:bg-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-blue-500 text-sm">
+                            </div>
+                            
+                            <button id="zip-download-button" class="w-full mb-4 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-lg transition duration-200 shadow-md flex justify-center items-center" onclick="downloadAllAsZip()">
+                                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                                Download Repository as ZIP
+                            </button>
+                            
+                            <ul id="fileList" class="border border-slate-200 dark:border-slate-600 rounded-xl divide-y divide-slate-200 dark:divide-slate-700 overflow-y-auto max-h-96 bg-slate-50 dark:bg-slate-900/50"></ul>
+                        </div>
+                    </div>
+
+                    <!-- Output Card -->
+                    <div id="output-container" class="bg-white dark:bg-slate-800 shadow-xl rounded-2xl p-6 md:p-8 hidden border border-slate-200 dark:border-slate-700 mb-12 animate-fade-in-up">
+                        <h2 class="text-xl font-semibold mb-6 flex items-center text-slate-900 dark:text-white">
+                            <span class="w-8 h-8 bg-green-100 text-green-600 rounded-lg flex items-center justify-center mr-3 text-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                            </span>
+                            Generated Link
+                        </h2>
+                        <div id="output" class="space-y-6">
+                            <!-- Content generated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION: GitHub Repos -->
+                <div id="tabRepos" class="tab-content hidden">
+                    <div class="bg-white dark:bg-slate-800 shadow-xl rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700">
+                        <h2 class="text-xl font-bold mb-2">Your GitHub Repositories</h2>
+                        <p class="text-sm text-slate-500 mb-6">Connect your account to see your repos, or click one to auto-fill the generator.</p>
+                        
+                        <div id="githubConnectOption" class="hidden bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 p-6 rounded-2xl text-center mb-6">
+                            <p class="mb-4 text-sm font-medium">Connect GitHub to view your repositories automatically.</p>
+                            <button class="bg-slate-900 text-white dark:bg-white dark:text-slate-900 px-6 py-2 rounded-lg font-bold text-sm">Login with GitHub</button>
+                        </div>
+                        <div id="repoList" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <p class="text-slate-500 text-sm">Login with GitHub to see your repos here.</p>
+                        </div>
+                    </div>
+                    
+                </div>
+
+                <!-- SECTION: Link History -->
+                <div id="tabHistory" class="tab-content hidden">
+                    <div class="bg-white dark:bg-slate-800 shadow-xl rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700">
+                        <h2 class="text-xl font-bold mb-6">Your Link History</h2>
+                        <div id="historyList" class="space-y-3">
+                            <p class="text-slate-500 text-sm">Please login to view history.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION: Password & Security -->
+                <div id="tabSecurity" class="tab-content hidden">
+                    <div class="bg-white dark:bg-slate-800 shadow-xl rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700">
+                        <h2 class="text-xl font-bold mb-6">Security Settings</h2>
+                        <div class="max-w-md">
+                            <p class="text-sm text-slate-500 mb-4">Update your account password (only applies if logged in via Email).</p>
+                            <input type="password" id="newPassword" placeholder="Enter New Password" class="w-full p-3 mb-4 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm">
+                            <button id="btnChangePass" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md transition">Update Password</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION: Notifications -->
+                <div id="tabNotifications" class="tab-content hidden">
+                    <div class="bg-white dark:bg-slate-800 shadow-xl rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700">
+                        <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                            <h2 class="text-xl font-bold text-slate-900 dark:text-white">Notifications</h2>
+                            <div class="flex gap-3">
+                                <button id="markAllReadBtn" class="text-sm font-bold text-blue-600 dark:text-blue-400 hover:underline">Mark all read</button>
+                                <button id="deleteSelectedBtn" class="text-sm font-bold text-red-600 dark:text-red-400 hover:underline hidden">Delete Selected</button>
+                            </div>
+                        </div>
+                        <div class="flex items-center mb-4 px-1" id="bulkSelectContainer">
+                            <input type="checkbox" id="selectAllNotifs" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
+                            <label for="selectAllNotifs" class="ml-2 text-sm font-medium text-slate-600 dark:text-slate-300 cursor-pointer select-none">Select All</label>
+                        </div>
+                        <div id="allNotificationsList" class="space-y-3">
+                            <p class="text-slate-500 text-center py-10">Loading notifications...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION: Theme Settings -->
+                <div id="tabTheme" class="tab-content hidden">
+                    <div class="bg-white dark:bg-slate-800 shadow-xl rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700">
+                        <h2 class="text-xl font-bold mb-6 text-slate-900 dark:text-white">Appearance</h2>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Choose your preferred theme interface.</p>
+                        
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                            <button onclick="setTheme('system')" id="btn-system" class="theme-selector p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-blue-500 transition flex flex-col items-center gap-3 group">
+                                <div class="w-full h-24 bg-slate-100 dark:bg-slate-900 rounded-lg flex items-center justify-center relative overflow-hidden group-hover:shadow-md transition">
+                                    <div class="absolute inset-0 bg-gradient-to-br from-white to-slate-300 dark:from-slate-800 dark:to-black opacity-50"></div>
+                                    <svg class="w-8 h-8 text-slate-500 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                </div>
+                                <span class="font-bold text-slate-700 dark:text-slate-300">System</span>
+                            </button>
+
+                            <button onclick="setTheme('light')" id="btn-light" class="theme-selector p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-blue-500 transition flex flex-col items-center gap-3 group">
+                                <div class="w-full h-24 bg-white rounded-lg flex items-center justify-center border border-slate-200 shadow-sm group-hover:shadow-md transition">
+                                    <svg class="w-8 h-8 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
+                                </div>
+                                <span class="font-bold text-slate-700 dark:text-slate-300">Light</span>
+                            </button>
+
+                            <button onclick="setTheme('dark')" id="btn-dark" class="theme-selector p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-blue-500 transition flex flex-col items-center gap-3 group">
+                                <div class="w-full h-24 bg-slate-900 rounded-lg flex items-center justify-center border border-slate-700 shadow-sm group-hover:shadow-md transition">
+                                    <svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>
+                                </div>
+                                <span class="font-bold text-slate-700 dark:text-slate-300">Dark</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SECTION: Contact Support -->
+                <div id="tabContact" class="tab-content hidden">
+                    <div class="bg-white dark:bg-slate-800 shadow-xl rounded-2xl p-6 md:p-8 border border-slate-200 dark:border-slate-700">
+                        <h2 class="text-xl font-bold mb-6 text-slate-900 dark:text-white">Contact Support</h2>
+                        <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">Having issues with the generator? Send us a message.</p>
+                        
+                        <form id="dashboardContactForm" class="space-y-4 max-w-lg">
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Subject</label>
+                                <select id="contactSubject" class="w-full p-3 border border-slate-200 dark:border-slate-600 rounded-xl dark:bg-slate-700 dark:text-slate-200 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                                    <option>Bug Report</option>
+                                    <option>Feature Request</option>
+                                    <option>Account Issue</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">Message</label>
+                                <textarea id="contactMessage" rows="4" class="w-full p-3 border border-slate-200 dark:border-slate-600 rounded-xl dark:bg-slate-700 dark:text-slate-200 text-sm focus:ring-2 focus:ring-blue-500 outline-none resize-none" placeholder="Describe your issue..."></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl shadow-md transition">Send Message</button>
+                        </form>
+
+                        <div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-700">
+                            <h3 class="font-bold text-sm text-slate-900 dark:text-white mb-3">Other ways to reach us</h3>
+                            <div class="flex flex-col space-y-2 text-sm text-slate-600 dark:text-slate-400">
+                                <a href="mailto:support@gitdelivr.in" class="flex items-center hover:text-blue-600 transition">
+                                    <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                                    support@gitdelivr.in
+                                </a>
+                                <a href="https://instagram.com/gitdelivr.in" target="_blank" class="flex items-center hover:text-pink-600 transition">
+                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                                    @gitdelivr.in
+                                </a>
+                                <a href="https://github.com/gitdelivr/gitdelivr.github.io/issues" target="_blank" class="flex items-center hover:text-blue-600 transition">
+                                    <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                                    Open an Issue on GitHub
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- App Footer -->
+            <footer class="app-footer mt-12 pt-8 pb-4 border-t border-slate-200 dark:border-slate-700 w-full max-w-4xl mx-auto shrink-0 flex flex-col items-center px-4">
+                <nav class="flex flex-wrap justify-center gap-x-6 sm:gap-x-8 gap-y-4 mb-6 text-center" aria-label="Footer Navigation">
+                    <a href="index.html#features" class="text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors">Features</a>
+                    <a href="index.html#how-it-works" class="text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors">How It Works</a>
+                    <a href="index.html#faq" class="text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors">FAQ</a>
+                    <a href="index.html#contact" class="text-sm font-medium text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white transition-colors">Contact</a>
+                </nav>
+                
+             
+
+                <p class="text-xs text-slate-400 dark:text-slate-500">&copy; 2026 GitDelivr.in. All rights reserved.</p>
+            </footer>
+
+        </main>
+
+        <!-- Google AdSense Container (Bottom Banner) -->
+        <div id="adBannerContainer" class="absolute bottom-0 w-full border-t border-slate-200 dark:border-slate-700 p-2 z-20 hidden transition-colors">
+            <!-- Ad will be injected here -->
+        </div>
+
+    </div>
+
+    <!-- Login Modal (Popup) -->
+    <div id="loginModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden z-[9999] flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl shadow-2xl p-8 relative">
+            <!-- Loading Overlay -->
+            <div id="loginLoadingOverlay" class="absolute inset-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl flex-col items-center justify-center hidden z-10">
+                <svg class="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p id="loginLoadingText" class="mt-4 text-lg font-semibold text-slate-700 dark:text-slate-200">Processing...</p>
+            </div>
+            <button onclick="closeModal('loginModal')" class="absolute top-5 right-5 text-slate-400 hover:text-slate-800 dark:hover:text-white transition">✕</button>
+            
+            <!-- Default Login / Create Account View -->
+            <div id="loginView" class="text-center">
+                <h2 class="text-2xl font-bold mb-2">Welcome Back</h2>
+                <p class="text-sm text-slate-500 mb-6">Login to generate links and save history.</p>
+                <button id="btnGithubLogin" class="w-full mb-3 flex items-center justify-center gap-3 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 font-bold py-3 rounded-xl transition">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" /></svg>
+                    Continue with GitHub
+                </button>
+                <button id="btnGoogleLogin" class="w-full mb-6 flex items-center justify-center gap-3 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 dark:bg-slate-700 dark:text-white font-bold py-3 rounded-xl transition">
+                    <svg class="w-5 h-5" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.223,0-9.65-3.657-11.303-8H6.306C9.656,39.663,16.318,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.99,36.506,44,30.836,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
+                    Continue with Google
+                </button>
+                
+                <div class="flex items-center my-4">
+                    <div class="flex-grow border-t dark:border-slate-700"></div>
+                    <span class="px-3 text-xs text-slate-400 uppercase">Or</span>
+                    <div class="flex-grow border-t dark:border-slate-700"></div>
+                </div>
+                
+                <input type="email" id="authEmail" placeholder="Email" class="w-full p-3 mb-3 border rounded-xl dark:bg-slate-900 text-sm">
+                <input type="password" id="authPass" placeholder="Password" class="w-full p-3 mb-2 border rounded-xl dark:bg-slate-900 text-sm">
+                
+                <div class="text-right mb-4">
+                    <button onclick="toggleView('forgotView')" class="text-xs text-blue-600 hover:underline font-bold">Forgot Password?</button>
+                </div>
+                
+                <button id="btnEmailLogin" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition">Login</button>
+                
+                <div id="unverifiedAlert" class="hidden mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-center transition-all">
+                    <p class="text-sm text-red-600 dark:text-red-400 mb-3 font-medium">Please verify your email before logging in.</p>
+                    <button id="btnResendVerification" class="w-full text-sm bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg transition shadow-sm">Resend Verification Email</button>
+                </div>
+
+                <p class="text-sm text-slate-500 mt-4">New here? <button onclick="toggleView('signupView')" class="text-blue-600 font-bold hover:underline">Create Account</button></p>
+            </div>
+
+            <!-- Forgot Password View -->
+            <div id="forgotView" class="text-center hidden">
+                <h2 class="text-2xl font-bold mb-2">Reset Password</h2>
+                <p class="text-sm text-slate-500 mb-6">Enter your email to receive a password reset link.</p>
+                
+                <input type="email" id="resetEmail" placeholder="Your Email" class="w-full p-3 mb-4 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all disabled:opacity-50">
+                
+                <!-- Status Message -->
+                <div id="forgotStatusMessage" class="hidden rounded-lg p-3 text-sm font-medium border mb-4 text-left transition-all duration-300"></div>
+
+                <button id="btnResetPass" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl mb-4 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                    <svg id="forgotSpinner" class="animate-spin hidden h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span id="forgotBtnText">Send Reset Link</span>
+                </button>
+                <p class="text-sm text-slate-500 mt-2">Remembered it? <button onclick="toggleView('loginView')" class="text-blue-600 font-bold hover:underline">Back to Login</button></p>
+            </div>
+
+            <!-- Signup View -->
+            <div id="signupView" class="text-center hidden">
+                <h2 class="text-2xl font-bold mb-2">Create Account</h2>
+                <p class="text-sm text-slate-500 mb-6">Join us to save your generated links.</p>
+                
+                <input type="text" id="signupName" placeholder="Full Name" class="w-full p-3 mb-3 border rounded-xl dark:bg-slate-900 text-sm">
+                <input type="email" id="signupEmail" placeholder="Email" class="w-full p-3 mb-3 border rounded-xl dark:bg-slate-900 text-sm">
+                <input type="password" id="signupPass" placeholder="Password (6+ chars)" class="w-full p-3 mb-4 border rounded-xl dark:bg-slate-900 text-sm">
+                
+                <button id="btnEmailSignup" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl mb-4 transition">Sign Up</button>
+                <p class="text-sm text-slate-500 mt-2">Already have an account? <button onclick="toggleView('loginView')" class="text-blue-600 font-bold hover:underline">Login</button></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JSZip for ZIP functionality -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <!-- Main application script -->
+    <script type="module" src="script.js"></script>
+</body>
+</html>
