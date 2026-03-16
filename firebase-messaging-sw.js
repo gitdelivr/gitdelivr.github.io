@@ -3,7 +3,7 @@ importScripts('https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-comp
 
 const firebaseConfig = {
     apiKey: "AIzaSyC_U_pYSYWNm6Q1ufFwQE_tYlQZIYeDU0g",
-    authDomain: "cdn-generator.firebaseapp.com",
+    authDomain: "gitdelivr.in",
     projectId: "cdn-generator",
     storageBucket: "cdn-generator.firebasestorage.app",
     messagingSenderId: "44677120607",

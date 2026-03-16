@@ -494,8 +494,10 @@ function showCDN(cdnLink, path) {
         <div class="space-y-2 pt-2">
             <p class="font-bold text-xs uppercase text-slate-500 tracking-wide">CDN Link</p>
             <div class="flex"><input value="${cdnLink}" readonly class="flex-grow p-3 border border-slate-200 dark:border-slate-600 rounded-l-lg bg-slate-50 dark:bg-slate-900 text-sm text-slate-600 dark:text-slate-300 truncate"><button class="bg-slate-200 dark:bg-slate-600 p-3 rounded-r-lg hover:bg-slate-300 dark:hover:bg-slate-500 transition" onclick="copyToClipboard('${safeLink}')">📋</button></div>
+            <div class="flex"><input value="${cdnLink}" readonly class="flex-grow p-3 border border-slate-200 dark:border-slate-600 rounded-l-lg bg-slate-50 dark:bg-slate-900 text-sm text-slate-600 dark:text-slate-300 truncate"><button class="bg-slate-200 dark:bg-slate-600 p-3 rounded-r-lg hover:bg-slate-300 dark:hover:bg-slate-500 transition flex items-center justify-center" onclick="copyToClipboard('${safeLink}')"><svg class="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button></div>
         </div>
         ${tagValue ? `<div class="space-y-2 pt-4"><p class="font-bold text-xs uppercase text-slate-500 tracking-wide">HTML Tag</p><div class="flex"><input value='${tagValue}' readonly class="flex-grow p-3 border border-slate-200 dark:border-slate-600 rounded-l-lg bg-slate-50 dark:bg-slate-900 text-sm text-blue-600 dark:text-blue-400 font-mono truncate"><button class="bg-slate-200 dark:bg-slate-600 p-3 rounded-r-lg hover:bg-slate-300 dark:hover:bg-slate-500 transition" onclick="copyToClipboard('${safeTag}')">📋</button></div></div>` : ''}
+        ${tagValue ? `<div class="space-y-2 pt-4"><p class="font-bold text-xs uppercase text-slate-500 tracking-wide">HTML Tag</p><div class="flex"><input value='${tagValue}' readonly class="flex-grow p-3 border border-slate-200 dark:border-slate-600 rounded-l-lg bg-slate-50 dark:bg-slate-900 text-sm text-blue-600 dark:text-blue-400 font-mono truncate"><button class="bg-slate-200 dark:bg-slate-600 p-3 rounded-r-lg hover:bg-slate-300 dark:hover:bg-slate-500 transition flex items-center justify-center" onclick="copyToClipboard('${safeTag}')"><svg class="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button></div></div>` : ''}
         <a class="inline-flex items-center mt-6 text-emerald-600 dark:text-emerald-400 hover:underline text-sm font-medium" href="${cdnLink}" download="${fileName}"><svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg> Download File</a>
     `;
     outputContainer.scrollIntoView({ behavior: 'smooth' });
@@ -887,6 +889,8 @@ window.loadHistory = async () => {
                     <div class="flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition">
                         <button onclick="copyToClipboard('${data.link}')" class="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border hover:bg-slate-100 dark:hover:bg-slate-700" title="Copy">📋</button>
                         <button onclick="deleteHistoryItem('${data.id}')" class="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20" title="Delete">🗑️</button>
+                        <button onclick="copyToClipboard('${data.link}')" class="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border hover:bg-slate-100 dark:hover:bg-slate-700 flex items-center justify-center" title="Copy"><svg class="w-4 h-4 text-slate-600 dark:text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg></button>
+                        <button onclick="deleteHistoryItem('${data.id}')" class="p-2 bg-white dark:bg-slate-800 rounded-lg shadow-sm border text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center justify-center" title="Delete"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
                     </div>
                 </div>
             `;
@@ -915,7 +919,7 @@ window.deleteHistoryItem = async (id) => {
 
 const firebaseConfig = {
     apiKey: "AIzaSyC_U_pYSYWNm6Q1ufFwQE_tYlQZIYeDU0g",
-    authDomain: "cdn-generator.firebaseapp.com",
+    authDomain: "gitdelivr.in",
     projectId: "cdn-generator",
     storageBucket: "cdn-generator.firebasestorage.app",
     messagingSenderId: "44677120607",
@@ -2717,6 +2721,7 @@ function initAdminPage() {
         data.forEach(d => {
             const date = d.timestamp ? new Date(d.timestamp.seconds * 1000).toLocaleDateString() : 'Just now';
             list.innerHTML += `<div class="flex justify-between items-center bg-gray-50 dark:bg-slate-700 p-3 rounded-lg border border-gray-100 dark:border-slate-600 group hover:bg-blue-50 dark:hover:bg-slate-600 transition-colors"><span class="text-sm font-mono text-slate-700 dark:text-slate-200">${d.email}</span><div class="flex items-center gap-3"><span class="text-xs text-gray-400">${date}</span><button onclick="window.deleteItem('subscribers', '${d.id}')" class="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">🗑️</button></div></div>`;
+            list.innerHTML += `<div class="flex justify-between items-center bg-gray-50 dark:bg-slate-700 p-3 rounded-lg border border-gray-100 dark:border-slate-600 group hover:bg-blue-50 dark:hover:bg-slate-600 transition-colors"><span class="text-sm font-mono text-slate-700 dark:text-slate-200">${d.email}</span><div class="flex items-center gap-3"><span class="text-xs text-gray-400">${date}</span><button onclick="window.deleteItem('subscribers', '${d.id}')" class="text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button></div></div>`;
         });
     }
 
@@ -2727,6 +2732,7 @@ function initAdminPage() {
         if(data.length === 0) { list.innerHTML = '<p class="text-gray-400 text-center col-span-full text-sm">No reviews yet.</p>'; return; }
         data.forEach(d => {
             list.innerHTML += `<div class="bg-gray-50 dark:bg-slate-700 p-4 rounded-xl border border-gray-100 dark:border-slate-600 relative group hover:shadow-md transition-shadow"><div class="flex justify-between mb-2"><span class="font-bold text-sm text-slate-800 dark:text-white">${d.name}</span><span class="text-yellow-500 text-xs">${"★".repeat(d.rating)}</span></div><p class="text-xs text-gray-600 dark:text-gray-300 italic">"${d.text}"</p><button onclick="window.deleteItem('reviews', '${d.id}')" class="absolute top-3 right-3 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all">🗑️</button></div>`;
+            list.innerHTML += `<div class="bg-gray-50 dark:bg-slate-700 p-4 rounded-xl border border-gray-100 dark:border-slate-600 relative group hover:shadow-md transition-shadow"><div class="flex justify-between mb-2"><span class="font-bold text-sm text-slate-800 dark:text-white">${d.name}</span><span class="text-yellow-500 text-xs">${"★".repeat(d.rating)}</span></div><p class="text-xs text-gray-600 dark:text-gray-300 italic">"${d.text}"</p><button onclick="window.deleteItem('reviews', '${d.id}')" class="absolute top-3 right-3 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button></div>`;
         });
     }
 
