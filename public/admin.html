@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitDelivr Admin</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body id="admin-page" class="bg-gray-50 dark:bg-slate-900 min-h-screen font-sans text-slate-900 dark:text-slate-100">
+
+    <div id="loginOverlay" class="fixed inset-0 z-50 bg-slate-900 flex items-center justify-center">
+        <div class="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-slate-200 dark:border-slate-700">
+            <div class="text-center mb-8">
+                <h1 class="text-3xl font-bold text-slate-900 dark:text-white mb-2">Admin Access</h1>
+                <p class="text-slate-600 dark:text-slate-400">Please login with your authorized Google account.</p>
+            </div>
+            <div class="pt-2">
+                <button id="adminGoogleLoginBtn" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition-all transform hover:-translate-y-1 flex items-center justify-center gap-3">
+                    <svg class="w-5 h-5" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.223,0-9.65-3.657-11.303-8H6.306C9.656,39.663,16.318,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.99,36.506,44,30.836,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
+                    Login with Google
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="dashboard" class="hidden min-h-screen p-6 md:p-8">
+        <div class="max-w-7xl mx-auto">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-4">
+                <div class="w-full sm:w-auto">
+                    <h1 class="text-3xl font-bold text-slate-800 dark:text-white">Dashboard</h1>
+                    <p class="text-slate-500 dark:text-slate-400">Welcome back, <span id="adminNameDisplay" class="font-bold text-blue-600 dark:text-blue-400">Admin</span></p>
+                    <div class="text-xs text-slate-400 mt-1 flex flex-wrap items-center gap-2">
+                        <span id="adminEmailDisplay"></span>
+                        <span class="bg-gray-100 text-gray-500 dark:bg-slate-700 dark:text-slate-400 px-1.5 py-0.5 rounded text-[10px] font-mono" id="adminUidDisplay"></span>
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-4 w-full sm:w-auto">
+                    <a href="index.html" class="px-4 py-2 bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg border border-gray-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 transition-colors text-sm font-medium flex items-center">
+                        View Site
+                    </a>
+                    <button id="logoutBtn" class="px-4 py-2 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded-lg border border-red-100 dark:border-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/40 transition-colors text-sm font-medium">
+                        Logout
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-8">
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
+                    <h3 class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase">Total Messages</h3>
+                    <p class="text-3xl font-bold text-slate-800 dark:text-white mt-2" id="statMessages">0</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
+                    <h3 class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase">Subscribers</h3>
+                    <p class="text-3xl font-bold text-slate-800 dark:text-white mt-2" id="statSubscribers">0</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
+                    <h3 class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase">Avg Rating</h3>
+                    <p class="text-3xl font-bold text-slate-800 dark:text-white mt-2" id="statRating">0.0</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
+                    <h3 class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase">Total Traffic</h3>
+                    <p class="text-3xl font-bold text-slate-800 dark:text-white mt-2" id="statTraffic">0</p>
+                </div>
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700">
+                    <h3 class="text-slate-500 dark:text-slate-400 text-sm font-medium uppercase">Avg Time</h3>
+                    <p class="text-3xl font-bold text-slate-800 dark:text-white mt-2" id="statTime">0s</p>
+                </div>
+            </div>
+
+            <div class="bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-gray-200 dark:border-slate-700 mb-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <h2 class="text-xl font-bold text-slate-800 dark:text-white">Traffic Overview</h2>
+                    <div class="flex flex-wrap bg-gray-100 dark:bg-slate-700 rounded-lg p-1 w-full sm:w-auto">
+                        <button onclick="window.updateChart('7d')" id="btn-7d" class="px-4 py-1.5 text-sm font-medium rounded-md transition-all bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-300 shadow-sm">7 Days</button>
+                        <button onclick="window.updateChart('1m')" id="btn-1m" class="px-4 py-1.5 text-sm font-medium rounded-md transition-all text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">30 Days</button>
+                        <button onclick="window.updateChart('1y')" id="btn-1y" class="px-4 py-1.5 text-sm font-medium rounded-md transition-all text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">1 Year</button>
+                    </div>
+                </div>
+                <div class="relative h-72 w-full">
+                    <canvas id="trafficChart"></canvas>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                        <h2 class="text-xl font-bold flex items-center text-slate-800 dark:text-white">
+                            <span class="bg-blue-100 text-blue-600 p-2 rounded-lg mr-3 text-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg></span>
+                            Messages
+                        </h2>
+                        <input type="text" id="searchMessages" placeholder="Search..." class="w-full sm:w-auto px-3 py-2 text-sm border border-gray-200 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-700 dark:text-white focus:outline-none focus:border-blue-500">
+                    </div>
+                    <div id="messagesList" class="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                        <p class="text-gray-500 text-center py-4">Loading...</p>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4">
+                        <h2 class="text-xl font-bold flex items-center text-slate-800 dark:text-white">
+                            <span class="bg-green-100 text-green-600 p-2 rounded-lg mr-3 text-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path></svg></span>
+                            Subscribers
+                        </h2>
+                        <button id="exportCsvBtn" class="w-full sm:w-auto text-xs font-bold text-green-600 bg-green-100 hover:bg-green-200 px-4 py-2 rounded-lg transition-colors">Export CSV</button>
+                    </div>
+                    <div id="subscribersList" class="space-y-2 max-h-[500px] overflow-y-auto pr-2">
+                        <p class="text-gray-500 text-center py-4">Loading...</p>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 lg:col-span-2">
+                    <div class="flex flex-col xl:flex-row gap-4 justify-between items-start xl:items-center mb-4">
+                        <h2 class="text-xl font-bold flex items-center text-slate-800 dark:text-white">
+                            <span class="bg-indigo-100 text-indigo-600 p-2 rounded-lg mr-3 text-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg></span>
+                            Registered Users
+                        </h2>
+                        <div class="w-full xl:w-auto flex flex-col sm:flex-row flex-wrap items-start sm:items-center justify-start xl:justify-end gap-4">
+                            <div id="userFilters" class="w-full sm:w-auto flex flex-wrap items-center bg-gray-100 dark:bg-slate-800 rounded-lg p-1 border dark:border-slate-700 gap-1">
+                                <button onclick="window.filterUsersByProvider('all')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs font-medium rounded-md transition-all bg-white dark:bg-slate-600 text-blue-600 dark:text-blue-300 shadow-sm">All</button>
+                                <button onclick="window.filterUsersByProvider('github.com')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-600 dark:text-slate-300">GitHub</button>
+                                <button onclick="window.filterUsersByProvider('google.com')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-600 dark:text-slate-300">Google</button>
+                                <button onclick="window.filterUsersByProvider('email')" class="flex-1 sm:flex-none px-3 py-1.5 text-xs font-medium rounded-md transition-all text-slate-600 dark:text-slate-300">Email</button>
+                            </div>
+                            <input type="text" id="searchUsers" placeholder="Search users..." class="w-full sm:w-48 px-3 py-2 text-sm border border-gray-200 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-700 dark:text-white focus:outline-none focus:border-blue-500 transition-all">
+                            <span id="userCount" class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded dark:bg-indigo-900 dark:text-indigo-300">0 Users</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-4 mb-4" id="bulkActions">
+                        <label class="flex items-center text-sm text-slate-600 dark:text-slate-400 cursor-pointer"><input type="checkbox" id="selectAllUsers" class="mr-2 rounded border-gray-300 text-blue-600 focus:ring-blue-500"> Select All</label>
+                        <button id="sendToSelectedBtn" class="hidden text-xs font-bold bg-blue-100 text-blue-600 hover:bg-blue-200 px-3 py-1.5 rounded-lg transition-colors">Send to Selected</button>
+                    </div>
+                    <div id="usersList" class="space-y-2 max-h-[500px] overflow-y-auto pr-2">
+                        <p class="text-gray-500 text-center py-4">Loading...</p>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 lg:col-span-2">
+                    <h2 class="text-xl font-bold mb-4 flex items-center text-slate-800 dark:text-white">
+                        <span class="bg-teal-100 text-teal-600 p-2 rounded-lg mr-3 text-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></span>
+                        Live User Activity
+                    </h2>
+                    <div class="overflow-x-auto w-full">
+                        <table class="w-full text-left border-collapse whitespace-nowrap">
+                            <thead>
+                                <tr class="text-xs font-semibold tracking-wide text-gray-500 uppercase border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-slate-800">
+                                    <th class="px-4 py-3">Time</th>
+       
+       
+                                        <th class="px-4 py-3">Location</th>
+                                    <th class="px-4 py-3">Device</th>
+                                    <th class="px-4 py-3">System</th>
+                                    <th class="px-4 py-3">IP</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activityTableBody" class="bg-white dark:bg-slate-800">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 lg:col-span-2">
+                    <h2 class="text-xl font-bold mb-4 flex items-center text-slate-800 dark:text-white">
+                        <span class="bg-yellow-100 text-yellow-600 p-2 rounded-lg mr-3 text-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"></path></svg></span>
+                        Reviews
+                    </h2>
+                    <div id="reviewsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <p class="text-gray-500 text-center py-4 col-span-full">Loading...</p>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 lg:col-span-2">
+                    <h2 class="text-xl font-bold mb-4 flex items-center text-slate-800 dark:text-white">
+                        <span class="bg-gray-100 text-gray-600 p-2 rounded-lg mr-3 text-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></span>
+                        Settings
+                    </h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700 rounded-lg gap-4">
+                            <div>
+                                <h4 class="font-bold text-slate-800 dark:text-white">Maintenance Mode</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Disables the main generator tool for all users.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="maintenanceToggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
+                            </label>
+                        </div>
+                        <div class="p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Custom Message</label>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="text" id="maintenanceMsgInput" class="flex-1 p-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 dark:text-white text-sm focus:outline-none focus:border-blue-500" placeholder="The tool is currently unavailable. Please check back later.">
+                                <button id="saveMaintenanceMsg" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm">Save</button>
+                            </div>
+                        </div>
+                        <div class="p-4 bg-gray-50 dark:bg-slate-700 rounded-lg">
+                            <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Schedule Maintenance</label>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="datetime-local" id="scheduleInput" class="flex-1 p-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 dark:text-white text-sm focus:outline-none focus:border-blue-500">
+                                <button id="saveScheduleBtn" class="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm">Schedule</button>
+                            </div>
+                            <div id="scheduledStatus" class="mt-2 text-xs text-slate-500 dark:text-slate-400 hidden">
+                                Scheduled for: <span id="scheduledTimeDisplay" class="font-bold text-slate-700 dark:text-slate-200"></span>
+                                <button id="cancelScheduleBtn" class="ml-2 text-red-500 hover:text-red-700 underline">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 lg:col-span-2">
+                    <h2 class="text-xl font-bold mb-4 flex items-center text-slate-800 dark:text-white">
+                        <span class="bg-purple-100 text-purple-600 p-2 rounded-lg mr-3 text-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z"></path></svg></span>
+                        Global Announcement
+                    </h2>
+                    <div class="space-y-4">
+                        <textarea id="announcementMsg" rows="2" class="w-full p-3 border border-gray-200 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-700 dark:text-white text-sm focus:outline-none focus:border-purple-500" placeholder="Enter announcement message (e.g., 'Server maintenance in 10 mins')..."></textarea>
+                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-gray-50 dark:bg-slate-700 p-3 rounded-lg gap-4">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="announcementToggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 dark:peer-focus:ring-purple-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-purple-600"></div>
+                                <span class="ml-3 text-sm font-medium text-gray-900 dark:text-gray-300">Active</span>
+                            </label>
+                            <div class="flex flex-col sm:flex-row items-center w-full sm:w-auto gap-3">
+                                <select id="announcementType" class="w-full sm:w-auto p-2 border border-gray-200 dark:border-slate-600 rounded-lg bg-white dark:bg-slate-800 dark:text-white text-sm focus:outline-none focus:border-purple-500">
+                                    <option value="info">Info</option>
+                                    <option value="warning">Warning</option>
+                                    <option value="error">Error</option>
+                                </select>
+                                <button id="saveAnnouncement" class="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm shadow-lg shadow-purple-500/30">Send Push</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 lg:col-span-2">
+                    <h2 class="text-xl font-bold mb-4 flex items-center text-slate-800 dark:text-white">
+                        <span class="bg-orange-100 text-orange-600 p-2 rounded-lg mr-3 text-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg></span>
+                        Google Ads Management
+                    </h2>
+                    <div class="space-y-6">
+                        <div>
+                            <label for="adSidebar" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Sidebar Ad Code</label>
+                            <textarea id="adSidebar" rows="4" class="w-full p-3 border border-gray-200 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-700 dark:text-white text-sm focus:outline-none focus:border-orange-500 font-mono" placeholder="<!-- Paste your sidebar ad code here -->"></textarea>
+                        </div>
+                        <div>
+                            <label for="adBanner" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Banner Ad Code</label>
+                            <textarea id="adBanner" rows="4" class="w-full p-3 border border-gray-200 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-700 dark:text-white text-sm focus:outline-none focus:border-orange-500 font-mono" placeholder="<!-- Paste your banner ad code here -->"></textarea>
+                        </div>
+                        <div class="flex justify-start sm:justify-end">
+                            <button id="saveAdsBtn" class="w-full sm:w-auto bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg transition-colors text-sm shadow-lg shadow-orange-500/30">Save Ad Codes</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 lg:col-span-2">
+                    <h2 class="text-xl font-bold mb-4 flex items-center text-slate-800 dark:text-white">
+                        <span class="bg-cyan-100 text-cyan-600 p-2 rounded-lg mr-3 text-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path></svg></span>
+                        Google Ads Layout
+                    </h2>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700 rounded-lg gap-4">
+                            <div>
+                                <h4 class="font-bold text-slate-800 dark:text-white">Enable Sidebar Ad</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Show ad block in the sidebar.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="adSidebarToggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-300 dark:peer-focus:ring-cyan-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-cyan-600"></div>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-gray-50 dark:bg-slate-700 rounded-lg gap-4">
+                            <div>
+                                <h4 class="font-bold text-slate-800 dark:text-white">Enable Bottom Banner Ad</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Show ad banner at the bottom of the page.</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="adBannerToggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-300 dark:peer-focus:ring-cyan-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-cyan-600"></div>
+                            </label>
+                        </div>
+                        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 dark:bg-slate-700 rounded-lg gap-4">
+                            <div>
+                                <h4 class="font-bold text-slate-800 dark:text-white">Container Background</h4>
+                                <p class="text-xs text-slate-500 dark:text-slate-400">Set background color for ad areas.</p>
+                            </div>
+                            <div class="flex items-center gap-3 w-full sm:w-auto">
+                                <input type="color" id="adBgColor" class="h-9 w-16 rounded cursor-pointer border border-gray-300 dark:border-slate-600 p-1 bg-white dark:bg-slate-800" value="#ffffff">
+                                <button id="saveAdColorBtn" class="w-full sm:w-auto bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-2 px-6 rounded-lg transition-colors text-sm">Save</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-slate-700 lg:col-span-2">
+                    <h2 class="text-xl font-bold mb-4 flex items-center text-slate-800 dark:text-white">
+                        <span class="bg-rose-100 text-rose-600 p-2 rounded-lg mr-3 text-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg></span>
+                        Quick Notification
+                    </h2>
+                    <div class="space-y-4">
+                        <textarea id="quickNotifyMessage" rows="3" class="w-full p-3 border border-gray-200 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-700 dark:text-white text-sm focus:outline-none focus:border-rose-500" placeholder="Enter message to send..."></textarea>
+                        <div class="flex flex-col sm:flex-row gap-4">
+                            <input type="text" id="quickNotifyUserId" placeholder="Specific User ID (optional)" class="w-full sm:flex-grow p-3 border border-gray-200 dark:border-slate-600 rounded-lg bg-gray-50 dark:bg-slate-700 dark:text-white text-sm focus:outline-none focus:border-rose-500">
+                            <button id="sendQuickNotification" class="w-full sm:w-auto bg-rose-600 hover:bg-rose-700 text-white font-bold py-3 px-6 rounded-lg transition-colors text-sm shadow-lg shadow-rose-500/30 whitespace-nowrap">
+                                Send to User
+                            </button>
+                        </div>
+                        <button id="sendQuickNotificationToAll" class="w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition-colors text-sm">
+                            Send to ALL Users
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="notificationModal" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 hidden backdrop-blur-sm">
+        <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-2xl w-[90%] max-w-sm border border-slate-200 dark:border-slate-700 transform transition-all scale-100">
+            <h3 class="text-xl font-bold mb-4 text-slate-800 dark:text-white flex items-center">
+                <span class="bg-blue-100 text-blue-600 p-2 rounded-lg mr-3 text-lg"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg></span>
+                Send Notification
+            </h3>
+            <input type="hidden" id="notifyUserId">
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Message</label>
+                <textarea id="notifyMessage" rows="4" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white text-sm resize-none" placeholder="Type your message here..."></textarea>
+            </div>
+            <div class="flex flex-col sm:flex-row justify-end gap-3">
+                <button onclick="document.getElementById('notificationModal').classList.add('hidden')" class="w-full sm:w-auto px-4 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg font-medium transition-colors">Cancel</button>
+                <button id="confirmSendNotification" class="w-full sm:w-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold shadow-lg shadow-blue-500/30 transition-all">Send</button>
+            </div>
+        </div>
+    </div>
+    <script type="module" src="script.js"></script>
+</body>
+</html>

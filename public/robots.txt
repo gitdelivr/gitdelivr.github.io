@@ -1,0 +1,4 @@
+User-agent: *
+Allow: / 
+llms.txt
+Sitemap: https://gitdelivr.in/sitemap.xml
