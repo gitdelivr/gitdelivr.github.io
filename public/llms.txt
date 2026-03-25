@@ -1,0 +1,35 @@
+# GitDelivr
+> A Native Global Edge CDN for Developers.
+
+## About
+GitDelivr is a blazing-fast, developer-focused Edge CDN created by Anurag. It solves CORS issues by serving raw files from code repositories (GitHub, GitLab, and Bitbucket) as production-ready, highly available CDN links.
+
+## Key Features
+- Bypasses strict CORS policies on raw repository files.
+- Global Edge Network routing for ultra-low latency.
+- Seamless integration for frontend web development, testing, and production.
+- Developer-first approach with a built-in AI Support Assistant.
+
+## Usage & URL Formats
+To use GitDelivr, developers simply convert their raw repository URLs into GitDelivr CDN links using the following formats:
+
+- **GitHub Format:** `https://cdn.gitdelivr.in/gh/[user]/[repo]@[branch]/[file]`
+  
+- **GitLab Format:** `https://cdn.gitdelivr.in/gl/[user]/[repo]@[branch]/[file]`
+  
+- **Bitbucket Format:** `https://cdn.gitdelivr.in/bb/[user]/[repo]@[branch]/[file]`
+
+## Technical Architecture
+- **Frontend:** Vanilla JavaScript, HTML5, CSS3, JavaScript
+- **Backend Infrastructure:** Firebase Hosting, Cloudflare Workers
+- **Database:** Firebase Firestore
+- **Authentication:** Firebase Auth
+- **AI Integration:** Google Gemini 2.5 Flash API via Cloudflare Edge Worker
+
+## Support & Contact
+- **Creator:** Anurag
+- **Contact:** support@gitdelivr.in
+- **Website:** https://gitdelivr.in/
+- **GitHub:** https://github.com/gitdelivr
+- **Twitter:** https://twitter.com/.in
+- **instagram:** https://www.instagram.com/gitdelivr.in

@@ -1,0 +1,800 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <title>GitDelivr - The Fastest GitHub CDN for Developers</title>
+    <meta property="og:title" content="GitDelivr - The Fastest GitHub CDN for Developers">
+    <meta property="og:description" content="GitDelivr - The Fastest GitHub CDN for Developers. Instantly turn any GitHub, GitLab, or Bitbucket file into a production-ready asset.">
+<meta property="og:image" content="https://gitdelivr.in/preview.png">
+<meta property="og:url" content="https://gitdelivr.in">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="google-site-verification" content="ikoU27rQb4NJXmglJZqphFencE-uosRfHEchhxUgMw0" />
+<meta name="google-adsense-account" content="ca-pub-2151253256641153">
+<meta name="google-site-verification" content="ptWGQJ8Qi-dAtDW4riaJFhsKS0sXz7Zna8fVIWYHQt4" />
+
+<link rel="canonical" href="https://gitdelivr.in/" />
+
+<meta name="description" content="GitDelivr is a blazing-fast Global Edge CDN for developers. Convert raw files from GitHub, GitLab, and Bitbucket into production-ready CDN links instantly." />
+
+<meta property="og:type" content="website" />
+
+<meta property="og:description" content="Convert raw GitHub, GitLab, and Bitbucket files into production-ready CDN links and solve CORS issues instantly." />
+
+ <meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="GitDelivr - Edge CDN for Developers" />
+<meta name="twitter:description" content="Convert raw GitHub, GitLab, and Bitbucket files into production-ready CDN links." />
+<meta name="twitter:image" content="https://gitdelivr.in/preview.png" />
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "GitDelivr",
+  "url": "https://gitdelivr.in/",
+  "applicationCategory": "DeveloperApplication",
+  "description": "A Native Global Edge CDN built specifically for developers to serve raw code files and solve CORS issues.",
+  "author": {
+    "@type": "Person",
+    "name": "Anurag"
+  }
+}
+</script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cookie&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/png" href="/favicon.png">
+<link rel="apple-touch-icon" href="/favicon.png">
+    <script>
+        // Check if the site is running on a local server
+        const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        if (!isLocalhost) {
+            const script = document.createElement('script');
+            script.async = true;
+            script.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2151253256641153";
+            script.crossOrigin = "anonymous";
+            document.head.appendChild(script);
+        }
+    </script>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { 
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    animation: {
+                        'dropdown-fade': 'dropdownFade 0.2s ease-out forwards',
+                    },
+                    keyframes: {
+                        dropdownFade: {
+                            '0%': { opacity: '0', transform: 'scale(0.95) translateY(-5px)' },
+                            '100%': { opacity: '1', transform: 'scale(1) translateY(0)' },
+                        }
+                    }
+                }
+            }
+        };
+    </script>
+    
+</head>
+<body class="bg-gray-50 text-slate-900 dark:bg-slate-900 dark:text-slate-100 min-h-screen font-sans transition-colors duration-300 flex flex-col">
+
+    <!-- Announcement Banner -->
+    <div id="announcementBanner" class="relative z-[2000] hidden transform -translate-y-full transition-all duration-500 ease-out shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div class="flex-1 flex items-center min-w-0">
+                    <span id="announcementIcon" class="flex p-2 rounded-lg bg-black/10 mr-3 shrink-0"></span>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-x-2 truncate">
+                        <span id="announcementTitle" class="font-bold text-sm sm:text-base uppercase tracking-tight"></span>
+                        <span class="hidden sm:inline text-white/40">|</span>
+                        <span id="announcementText" class="text-white/90 text-sm sm:text-base font-medium truncate"></span>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <button id="closeAnnouncement" class="p-1.5 rounded-lg hover:bg-black/10 transition-colors" aria-label="Close">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Bar -->
+    <header class="h-16 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 flex items-center justify-between px-4 sm:px-8 sticky top-0 z-50">
+        <!-- Left: Hamburger & Logo -->
+        <div class="flex items-center">
+            <button id="mobile-menu-button" class="md:hidden mr-4 text-slate-600 dark:text-slate-300 hover:text-blue-600 transition focus:outline-none">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <a href="#" class="flex items-center">
+                <span class="text-xl font-bold tracking-tight text-blue-600 dark:text-blue-400">GitDelivr</span><span class="text-xl font-bold tracking-tight text-slate-900 dark:text-white">.in</span>
+            </a>
+        </div>
+
+        <!-- Middle: Desktop Navigation -->
+        <div class="hidden md:flex space-x-6 items-center mx-4">
+            <a href="https://gitdelivr.in/cdn_generator.html" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition text-sm">Tool</a>
+            <a href="#features" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition text-sm">Features</a>
+            <a href="#how-it-works" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition text-sm">How It Works</a>
+            <a href="#faq" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition text-sm">FAQ</a>
+            <a href="#contact" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition text-sm">Contact</a>
+            <a href="blog/index.html" class="text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 font-medium transition text-sm">Blog</a>
+        </div>
+
+        <!-- Right: Profile / Login -->
+        <div class="flex items-center">
+            <button id="topLoginBtn" onclick="openModal('loginModal')" class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-lg text-sm font-bold shadow-md transition">
+                Login
+            </button>
+            
+            <div id="topProfileSection" class="hidden flex items-center gap-3">
+                <!-- Notification Bell -->
+                <div class="relative">
+                    <button id="notificationBtn" class="p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition relative">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                        <span id="notificationBadge" class="absolute top-1 right-1 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden">0</span>
+                    </button>
+                    <!-- Notification Dropdown -->
+                    <div id="notificationDropdown" class="hidden absolute right-0 mt-2 w-80 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden animate-dropdown-fade origin-top-right">
+                        <div class="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex justify-between items-center">
+                            <h3 class="font-bold text-sm text-slate-800 dark:text-white">Notifications</h3>
+                            <button onclick="markAllRead()" class="text-xs text-blue-600 hover:underline">Mark all read</button>
+                        </div>
+                        <div class="p-2 border-b border-slate-100 dark:border-slate-700">
+                            <input type="text" id="searchNotifications" placeholder="Search..." class="w-full bg-slate-100 dark:bg-slate-900 text-sm rounded-md px-2 py-1.5 border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        </div>
+                        <div id="notificationList" class="max-h-64 overflow-y-auto">
+                            <p class="text-center text-slate-500 text-xs py-4">No notifications</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Dropdown -->
+                <div class="relative">
+                    <button onclick="toggleDropdown('profileDropdown')" class="flex items-center gap-2 focus:outline-none hover:opacity-80 transition">
+                        <img id="topAvatar" src="https://ui-avatars.com/api/?name=User" class="w-9 h-9 rounded-full border border-blue-500 object-cover shadow-sm">
+                        <svg class="w-4 h-4 text-slate-500 hidden sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div id="profileDropdown" class="hidden absolute right-0 mt-3 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50 py-2 animate-dropdown-fade origin-top-right">
+                        <div class="px-4 py-2 border-b border-slate-100 dark:border-slate-700">
+                            <p id="dropName" class="font-bold text-sm text-slate-900 dark:text-white truncate">User Name</p>
+                            <p id="dropEmail" class="text-xs text-slate-500 truncate">user@email.com</p>
+                        </div>
+                        <a href="cdn_generator.html" class="block w-full text-left px-4 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700">Go to Dashboard</a>
+                        <button onclick="logout()" class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20">Logout</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu Container -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 sticky top-16 z-40 shadow-md transition-all">
+        <div class="px-4 pt-2 pb-4 space-y-2">
+            <a href="/app.html" class="block px-3 py-2 rounded-md text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-blue-600 dark:hover:text-blue-400 transition">Download App</a>
+            <a href="https://gitdelivr.in/cdn_generator.html" class="block px-3 py-2 rounded-md text-sm font-medium text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800">Launch Tool</a>
+            <a href="#features" class="block px-3 py-2 rounded-md text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800">Features</a>
+            <a href="#how-it-works" class="block px-3 py-2 rounded-md text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800">How It Works</a>
+            <a href="#faq" class="block px-3 py-2 rounded-md text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800">FAQ</a>
+            <a href="#contact" class="block px-3 py-2 rounded-md text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800">Contact</a>
+            <a href="blog/index.html" class="block px-3 py-2 rounded-md text-sm font-medium text-slate-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800">Blog</a>
+            <button onclick="openModal('loginModal')" class="w-full text-left block px-3 py-2 rounded-md text-sm font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-slate-800/50">Login</button>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <header class="relative text-center py-20 px-4 overflow-hidden">
+        <!-- Background Gradient Blur -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-blue-400/20 dark:bg-blue-600/20 blur-[100px] rounded-full -z-10 animate-float"></div>
+
+        <div class="max-w-4xl mx-auto">
+            <div class="opacity-0 translate-y-4 transition-all duration-700 ease-out scroll-reveal inline-flex items-center px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs font-semibold tracking-wide uppercase mb-6 border border-blue-100 dark:border-blue-800">
+                v3.0 Now Available
+            </div>
+            <h1 class="opacity-0 translate-y-4 transition-all duration-700 ease-out delay-[100ms] scroll-reveal text-5xl sm:text-7xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight">
+                Direct, Native <br>
+                <span class="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500 dark:from-blue-400 dark:to-cyan-300">GitDelivr CDN</span>
+            </h1>
+            <p class="opacity-0 translate-y-4 transition-all duration-700 ease-out delay-[200ms] scroll-reveal mt-8 text-xl text-slate-600 dark:text-slate-300 leading-relaxed max-w-2xl mx-auto">
+                Stop struggling with raw links. Instantly turn any GitHub, GitLab, or Bitbucket file into a production-ready asset served by GitDelivr Infrastructure.
+            </p>
+            <div class="opacity-0 translate-y-4 transition-all duration-700 ease-out delay-[300ms] scroll-reveal mt-10 flex flex-col sm:flex-row justify-center gap-4">
+              <a href="https://gitdelivr.github.io/cdn_generator.html" class="cta-button px-8 py-4 text-lg font-bold rounded-full shadow-lg hover:-translate-y-1 hover:shadow-blue-500/20 hover:border-blue-400/50 transition-all duration-300 ease-out">
+    Generate CDN Link
+</a>
+                <a href="/app.html" class="px-8 py-4 text-lg font-medium rounded-full text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:bg-gray-50 dark:hover:bg-slate-700 hover:-translate-y-1 hover:shadow-lg hover:shadow-slate-500/10 transition-all duration-300 ease-out">
+                    Download App
+                </a>
+            </div>
+            
+            <div class="opacity-0 translate-y-4 transition-all duration-700 ease-out delay-[400ms] scroll-reveal mt-8 flex items-center justify-center space-x-2 text-sm text-slate-500 dark:text-slate-400">
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span>No credit card required</span>
+                <span class="mx-2">•</span>
+                <svg class="w-5 h-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <span>Open Source</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- NEW: Logo Cloud / Trusted By -->
+    <section class="py-10 border-y border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50">
+        <div class="max-w-6xl mx-auto px-4 text-center opacity-0 translate-y-8 transition-all duration-700 ease-out scroll-reveal">
+            <p class="text-sm font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-6">Compatible with your favorite tools</p>
+            <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 grayscale transition hover:grayscale-0 duration-500">
+                <span class="text-xl font-bold font-mono hover:text-blue-500 transition">GitHub</span>
+                <span class="text-xl font-bold font-sans hover:text-red-500 transition">npm</span>
+                <span class="text-xl font-bold font-serif hover:text-blue-700 transition">WordPress</span>
+                <span class="text-xl font-bold hover:text-cyan-400 transition">React</span>
+                <span class="text-xl font-bold hover:text-green-500 transition">Vue.js</span>
+                <span class="text-xl font-bold font-mono hover:text-purple-500 transition">Bootstrap</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Grid -->
+    <section id="features" class="py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16 opacity-0 translate-y-8 transition-all duration-700 ease-out scroll-reveal">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">Everything you need for production</h2>
+                <p class="text-lg text-slate-600 dark:text-slate-400">We handle the complexity of asset delivery so you can focus on code.</p>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Card 1 -->
+                <div class="opacity-0 translate-y-8 transition-all duration-700 ease-out delay-[100ms] scroll-reveal bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:shadow-blue-500/10 hover:border-blue-500/30 transition-all duration-300 ease-out group hover:-translate-y-1">
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Global Edge Caching</h3>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">Powered by Cloudflare's 300+ locations for sub-10ms latency.</p>
+                </div>
+
+                <!-- Card 2 -->
+                <div class="opacity-0 translate-y-8 transition-all duration-700 ease-out delay-[200ms] scroll-reveal bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:shadow-purple-500/10 hover:border-purple-500/30 transition-all duration-300 ease-out group hover:-translate-y-1">
+                    <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Multi-Source Support</h3>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">Seamlessly fetch from GitHub, GitLab, and Bitbucket without any API keys.</p>
+                </div>
+
+                <!-- Card 3 -->
+                <div class="opacity-0 translate-y-8 transition-all duration-700 ease-out delay-[300ms] scroll-reveal bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 hover:shadow-xl hover:shadow-emerald-500/10 hover:border-emerald-500/30 transition-all duration-300 ease-out group hover:-translate-y-1">
+                    <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300">
+                        <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-slate-900 dark:text-white">Privacy First</h3>
+                    <p class="text-slate-600 dark:text-slate-400 leading-relaxed">No tracking, no cookies. Just pure, fast, and open-source delivery.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Section -->
+    <section class="py-16 bg-slate-900 text-white relative overflow-hidden">
+        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-10"></div>
+        <div class="max-w-6xl mx-auto px-4 relative z-10">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-slate-700/50 opacity-0 translate-y-8 transition-all duration-700 ease-out scroll-reveal">
+                <!-- <div class="hover:scale-105 transition-transform duration-300">
+                    <div id="homeTotalUsers" class="text-4xl font-extrabold text-blue-400 mb-1 animate-pulse">...</div>
+                    <div class="text-sm text-slate-400 uppercase tracking-wide font-semibold">Registered Users</div>
+                </div> -->
+                 <div class="hover:scale-105 transition-transform duration-300">
+                    <div class="text-4xl font-extrabold text-blue-400 mb-1">100+</div>
+                    <div class="text-sm text-slate-400 uppercase tracking-wide font-semibold">Global Locations
+</div>
+                </div>
+                <div class="hover:scale-105 transition-transform duration-300">
+                    <div class="text-4xl font-extrabold text-blue-400 mb-1">100%</div>
+                    <div class="text-sm text-slate-400 uppercase tracking-wide font-semibold">Free & Open</div>
+                </div>
+                <div class="hover:scale-105 transition-transform duration-300">
+                    <div id="homeTotalTraffic" class="text-4xl font-extrabold text-blue-400 mb-1 animate-pulse">...</div>
+                    <div class="text-sm text-slate-400 uppercase tracking-wide font-semibold"> Users</div>
+                </div>
+                <div class="hover:scale-105 transition-transform duration-300">
+                    <div id="homeAvgRating" class="text-4xl font-extrabold text-blue-400 mb-1 animate-pulse">...</div>
+                    <div class="text-sm text-slate-400 uppercase tracking-wide font-semibold">Average Rating</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section id="how-it-works" class="py-20 px-4 bg-gray-50 dark:bg-slate-800/50">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold text-center mb-16 text-slate-900 dark:text-white opacity-0 translate-y-8 transition-all duration-700 ease-out scroll-reveal">Three steps to speed</h2>
+            
+            <div class="space-y-8">
+                <!-- Step 1 -->
+                <div class="opacity-0 translate-y-8 transition-all duration-700 ease-out delay-[100ms] scroll-reveal flex flex-col md:flex-row items-center bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-500/30">
+                    <div class="flex-shrink-0 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl mb-4 md:mb-0 md:mr-6">1</div>
+                    <div class="text-center md:text-left">
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Enter Repository Details</h3>
+                        <p class="text-slate-600 dark:text-slate-400 mt-1">Simply paste your GitHub username and repository name. We support all public repositories out of the box.</p>
+                    </div>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="opacity-0 translate-y-8 transition-all duration-700 ease-out delay-[200ms] scroll-reveal flex flex-col md:flex-row items-center bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-500/30">
+                    <div class="flex-shrink-0 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl mb-4 md:mb-0 md:mr-6">2</div>
+                    <div class="text-center md:text-left">
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Select Your File</h3>
+                        <p class="text-slate-600 dark:text-slate-400 mt-1">Our smart file browser fetches your repo structure instantly. Just click the file you need—no cloning required.</p>
+                    </div>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="opacity-0 translate-y-8 transition-all duration-700 ease-out delay-[300ms] scroll-reveal flex flex-col md:flex-row items-center bg-white dark:bg-slate-800 p-6 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-500/30">
+                    <div class="flex-shrink-0 w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl mb-4 md:mb-0 md:mr-6">3</div>
+                    <div class="text-center md:text-left">
+                        <h3 class="text-xl font-bold text-slate-900 dark:text-white">Copy & Paste</h3>
+                        <p class="text-slate-600 dark:text-slate-400 mt-1">Get the optimized CDN link or full HTML tag instantly. Paste it into your project and you're done.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Use Cases Section -->
+    <section id="uses" class="py-16 px-4 bg-white dark:bg-slate-900">
+    <div class="max-w-5xl mx-auto">
+        <div class="text-center mb-10 opacity-0 translate-y-8 transition-all duration-700 ease-out scroll-reveal">
+            <h2 class="text-3xl font-bold text-slate-900 dark:text-white">Who is this for?</h2>
+            <p class="mt-4 text-slate-600 dark:text-slate-400">GitDelivr helps thousands of creators every day.</p>
+        </div>
+        
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="opacity-0 translate-y-8 transition-all duration-700 ease-out delay-[100ms] scroll-reveal p-6 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-500/50">
+                    <h4 class="font-bold text-lg text-blue-500 mb-2">Developers</h4>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Quickly test libraries or assets in CodePen, JSFiddle, or local environments.</p>
+                </div>
+                <div class="opacity-0 translate-y-8 transition-all duration-700 ease-out delay-[200ms] scroll-reveal p-6 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-500/50">
+                    <h4 class="font-bold text-lg text-blue-500 mb-2">Maintainers</h4>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Share direct installation links for your open-source projects in your README.</p>
+                </div>
+                <div class="opacity-0 translate-y-8 transition-all duration-700 ease-out delay-[300ms] scroll-reveal p-6 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-500/50">
+                    <h4 class="font-bold text-lg text-blue-500 mb-2">Designers</h4>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Host portfolio images, custom fonts, and CSS stylesheets for free.</p>
+                </div>
+                <div class="opacity-0 translate-y-8 transition-all duration-700 ease-out delay-[400ms] scroll-reveal p-6 rounded-xl bg-gray-50 dark:bg-slate-800 border border-gray-100 dark:border-slate-700 transition-all duration-300 ease-out hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-500/50">
+                    <h4 class="font-bold text-lg text-blue-500 mb-2">Students</h4>
+                    <p class="text-sm text-slate-600 dark:text-slate-400">Learn how to link external resources in HTML. Great for school projects.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials with Review Button -->
+    <section class="py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl font-bold text-center mb-12 text-slate-900 dark:text-white opacity-0 translate-y-8 transition-all duration-700 ease-out scroll-reveal">Loved by Developers</h2>
+            <div id="testimonialsGrid" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                <!-- Dynamic Reviews from Firebase will appear here -->
+                
+                <!-- Default/Static Reviews -->
+               
+            </div>
+            
+            <div class="text-center opacity-0 translate-y-8 transition-all duration-700 ease-out scroll-reveal">
+                <button id="openReviewModal" class="inline-flex items-center px-6 py-3 border border-slate-300 dark:border-slate-600 shadow-sm text-base font-medium rounded-full text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-500/30 transition-all duration-300 ease-out">
+                    <svg class="w-5 h-5 mr-2 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                    Write a Review
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section id="faq" class="py-20 px-4 bg-gray-50 dark:bg-slate-800/50">
+        <div class="max-w-3xl mx-auto opacity-0 translate-y-8 transition-all duration-700 ease-out scroll-reveal">
+            <h2 class="text-3xl font-bold text-center mb-10 text-slate-900 dark:text-white">Frequently Asked Questions</h2>
+            <div class="space-y-4">
+                <div class="opacity-0 translate-y-8 transition-all duration-700 ease-out delay-[100ms] scroll-reveal bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-500/30 transition-all duration-300 ease-out">
+                    <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">Is this completely free?</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">Yes! We use our own high-performance GitDelivr infrastructure which is free for everyone. We don't charge for generating the links.</p>
+                </div>
+                <div class="opacity-0 translate-y-8 transition-all duration-700 ease-out delay-[200ms] scroll-reveal bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-500/30 transition-all duration-300 ease-out">
+                    <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">What about private repositories?</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">GitDelivr works best with public repositories. For private ones, you would need a token, which we are working on supporting soon.</p>
+                </div>
+                <div class="opacity-0 translate-y-8 transition-all duration-700 ease-out delay-[300ms] scroll-reveal bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-500/30 transition-all duration-300 ease-out">
+                    <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">Is there a traffic limit?</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">For standard use, there are no limits. GitDelivr's edge network is built to handle massive traffic.</p>
+                </div>
+                <div class="opacity-0 translate-y-8 transition-all duration-700 ease-out delay-[400ms] scroll-reveal bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-500/30 transition-all duration-300 ease-out">
+                    <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">How do I update my cached file?</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">To update a file, simply push a new commit. If you use a specific version tag (recommended), create a new release. For branch links, changes may take up to 24 hours to propagate unless manually purged.</p>
+                </div>
+                <div class="opacity-0 translate-y-8 transition-all duration-700 ease-out delay-[500ms] scroll-reveal bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-500/30 transition-all duration-300 ease-out">
+                    <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-2">Can I use this for commercial projects?</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">Yes, GitDelivr is free for commercial use. Just ensure your repository settings and code licenses permit the intended usage.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+<section id="blogs" class="py-20 px-4">
+        <div class="max-w-6xl mx-auto">
+            <div class="text-center mb-16 opacity-0 translate-y-8 transition-all duration-700 ease-out scroll-reveal">
+                <h2 class="text-3xl md:text-4xl font-bold text-slate-900 dark:text-white mb-4">Latest Blogs</h2>
+                <p class="text-lg text-slate-600 dark:text-slate-400">Updates, tutorials, and insights from our team.</p>
+            </div>
+            
+            <div id="blog-container" class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                <div class="col-span-full text-center py-10">
+                    <div class="loader mx-auto"></div>
+                </div>
+            </div>
+
+            <div class="text-center opacity-0 translate-y-8 transition-all duration-700 ease-out scroll-reveal">
+                <a href="https://webcodeze.blogspot.com/" target="_blank" class="inline-flex items-center px-6 py-3 border border-slate-300 dark:border-slate-600 shadow-sm text-base font-medium rounded-full text-slate-700 dark:text-slate-200 bg-white dark:bg-slate-800 hover:bg-gray-50 dark:hover:bg-slate-700 hover:-translate-y-1 hover:shadow-lg hover:shadow-blue-500/10 hover:border-blue-500/30 transition-all duration-300 ease-out">
+                    View All Blogs
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                </a>
+            </div>
+        </div>
+    </section>
+    <!-- Contact Section -->
+    <section id="contact" class="py-20 px-4 bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800">
+        <div class="max-w-3xl mx-auto opacity-0 translate-y-8 transition-all duration-700 ease-out scroll-reveal">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">Get in Touch</h2>
+                <p class="text-lg text-slate-600 dark:text-slate-400">Have questions, suggestions, or just want to say hi? Drop us a message below.</p>
+            </div>
+            
+            <form id="contactForm" class="space-y-6 bg-gray-50 dark:bg-slate-800 p-8 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label for="contactName" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Name</label>
+                        <input type="text" id="contactName" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white transition-all outline-none" placeholder="Your Name" required>
+                    </div>
+                    <div>
+                        <label for="contactEmail" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Email</label>
+                        <input type="email" id="contactEmail" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white transition-all outline-none" placeholder="you@example.com" required>
+                    </div>
+                </div>
+                <div>
+                    <label for="contactMessage" class="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Message</label>
+                    <textarea id="contactMessage" rows="4" class="w-full px-4 py-3 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white transition-all resize-none outline-none" placeholder="How can we help?" required></textarea>
+                </div>
+                <button type="submit" id="submitContact" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg hover:shadow-blue-500/20 hover:border-blue-400/50 transition-all duration-300 ease-out transform hover:-translate-y-1">
+                    Send Message
+                </button>
+                <p id="contactStatus" class="text-center text-sm mt-4 hidden"></p>
+            </form>
+        </div>
+    </section>
+
+    <!-- Donation Section (Hidden)
+    <section class="py-20 px-4 flex justify-center items-center bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 reveal">
+        <div class="bg-slate-50 dark:bg-slate-800 w-full max-w-3xl rounded-3xl shadow-xl overflow-hidden border border-slate-200 dark:border-slate-700 transform transition-all hover:scale-[1.01]">
+            <div class="flex flex-col md:flex-row">
+                <div class="bg-[#FFDD00] p-8 flex flex-col justify-center items-center text-center md:w-2/5 relative overflow-hidden">
+                    <div class="absolute -top-6 -left-6 w-24 h-24 bg-yellow-300 rounded-full opacity-50"></div>
+                    <div class="relative z-10 bg-white p-3 rounded-full shadow-lg mb-4 animate-bounce-slow">
+                        <svg class="w-10 h-10 text-yellow-500" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M18.5 5h-1.9c-.4-1.7-2-3-3.9-3H6c-2.2 0-4 1.8-4 4v6c0 2.2 1.8 4 4 4h.5c.8 1.8 2.5 3 4.5 3h2c2.2 0 4-1.8 4-4v-.5c2 0 3.7-1.4 4.3-3.3.7-2.4-.8-4.9-2.8-5.2zM11 17H6c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2h6.7c1.1 0 2 .9 2 2v9c0 1.1-.9 2-2 2zm7.5-5.8c0 .7-.3 1.3-.8 1.8-.5.5-1.1.8-1.8.9V6.1c1.5.2 2.6 1.5 2.6 3.1z"/>
+                            <path class="steam-1" d="M8 0h1v3H8z"/>
+                            <path class="steam-2" d="M10 0h1v3h-1z"/>
+                        </svg>
+                    </div>
+                    <h3 class="font-bold text-2xl text-black font-cookie mb-1">Fuel the Code</h3>
+                    <p class="text-xs text-black font-semibold uppercase tracking-wider opacity-80">Support Anurag</p>
+                </div>
+                <div class="p-8 md:w-3/5 flex flex-col justify-center text-center md:text-left">
+                    <h2 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Help keep the servers running</h2>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm mb-6">
+                        GitDelivr is 100% free and open source. If this tool saved you time, a coffee helps me maintain the domain and code!
+                    </p>
+                    <a href="https://www.buymeacoffee.com/Anuragfr" target="_blank" class="group relative w-full flex items-center justify-center py-3 px-6 border border-transparent rounded-xl text-black font-bold bg-[#FFDD00] hover:bg-[#ffe44d] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 transition-all shadow-md hover:shadow-lg hover:-translate-y-1">
+                        <span class="font-cookie text-2xl mr-2">☕</span>
+                        <span>Buy me a coffee</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section> 
+-->
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-300 py-12 border-t border-slate-800 mt-auto">
+        <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div class="col-span-1 md:col-span-1">
+                <div class="flex items-center space-x-2 mb-4">
+                    <span class="text-xl font-bold text-white">GitDelivr</span>
+                </div>
+                <p class="text-sm text-slate-400">Making GitHub assets production-ready for developers worldwide.</p>
+                <div class="mt-6">
+                    <h4 class="text-sm font-bold text-white uppercase tracking-wider mb-3">Newsletter</h4>
+                    <form id="newsletterForm" class="flex gap-2">
+                        <input id="newsletterEmail" type="email" placeholder="Email address" class="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-sm text-slate-300 focus:outline-none focus:border-blue-500 transition-colors" required>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-lg transition-colors">Subscribe</button>
+                    </form>
+                </div>
+                <div class="mt-8">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Follow our updates</h4>
+                    <div class="flex items-center gap-4">
+                        <a href="https://x.com/GitDelivr" target="_blank" aria-label="Twitter / X" class="text-slate-400 hover:text-white transform hover:scale-110 transition-all duration-300">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                        </a>
+                        <a href="https://instagram.com/gitdelivr.in" target="_blank" aria-label="Instagram" class="text-slate-400 hover:text-pink-500 transform hover:scale-110 transition-all duration-300">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.067.06 1.407.06 4.123v.08c0 2.643-.012 2.987-.06 4.043-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.067.048-1.407.06-4.123.06h-.08c-2.643 0-2.987-.012-4.043-.06-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.047-1.024-.06-1.379-.06-3.808v-.63c0-2.43.013-2.784.06-3.808.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.45 2.525c.636-.247 1.363-.416 2.427-.465C8.901 2.013 9.256 2 11.685 2h.63zm-.081 1.802h-.468c-2.456 0-2.784.011-3.807.058-.975.045-1.504.207-1.857.344-.467.182-.8.398-1.15.748-.35.35-.566.683-.748 1.15-.137.353-.3.882-.344 1.857-.047 1.023-.058 1.351-.058 3.807v.468c0 2.456.011 2.784.058 3.807.045.975.207 1.504.344 1.857.182.466.399.8.748 1.15.35.35.683.566 1.15.748.353.137.882.3 1.857.344 1.054.048 1.37.058 4.041.058h.08c2.597 0 2.917-.01 3.96-.058.976-.045 1.505-.207 1.858-.344.466-.182.8-.398 1.15-.748.35-.35.566-.683.748-1.15.137-.353.3-.882.344-1.857.048-1.055.058-1.37.058-4.041v-.08c0-2.597-.01-2.917-.058-3.96-.045-.976-.207-1.505-.344-1.858a3.097 3.097 0 00-.748-1.15 3.098 3.098 0 00-1.15-.748c-.353-.137-.882-.3-1.857-.344-1.023-.047-1.351-.058-3.807-.058zM12 6.865a5.135 5.135 0 110 10.27 5.135 5.135 0 010-10.27zm0 1.802a3.333 3.333 0 100 6.666 3.333 3.333 0 000-6.666zm5.338-3.205a1.2 1.2 0 110 2.4 1.2 1.2 0 010-2.4z" clip-rule="evenodd" /></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4">Product</h4>
+                <ul class="space-y-2 text-sm">
+                   <li><a href="cdn_generator.html" class="hover:text-blue-400 transition">CDN Tool</a></li>
+                     <li><a href="#features" class="hover:text-blue-400 transition">Features</a></li>
+                    <li><a href="#faq" class="hover:text-blue-400 transition">FAQ</a></li>
+                    <li><a href="#" id="openTosModal" class="hover:text-blue-400 transition">Terms of Service</a></li>
+                    <li><a href="#" id="openPrivacyModal" class="hover:text-blue-400 transition">Privacy Policy</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4">Resources</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="https://github.com/gitdelivr" target="_blank" class="hover:text-blue-400 transition">GitHub API</a></li>
+                    <li><a href="https://ai.google/" target="_blank" class="hover:text-blue-400 transition">Google AI</a></li>
+                    <li><a href="https://www.netlify.com/" target="_blank" class="hover:text-blue-400 transition">Netlify</a></li>
+                 </ul>
+            </div>   <div>
+                <h4 class="text-white font-bold mb-4">Connect</h4>
+                <ul class="space-y-3 text-sm">
+                    <li>
+                        <a href="mailto:support@gitdelivr.in" class="hover:text-blue-400 transition flex items-center group">
+                            Contact Support
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://github.com/gitdelivr/gitdelivr.github.io" target="_blank" class="hover:text-blue-400 transition flex items-center group">
+                            GitHub Repository
+                        </a>
+                    </li>
+                    <li>
+                        <a href="https://instagram.com/gitdelivr.in" target="_blank" class="hover:text-pink-400 transition flex items-center group">
+                            Instagram <span class="opacity-75 text-xs ml-1">@gitdelivr.in</span>
+                        </a>
+                    </li>
+                    <li><a href="https://anuxagfr.github.io" target="_blank" class="hover:text-blue-400 transition">My Portfolio</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="max-w-6xl mx-auto px-4 border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="text-sm text-slate-500 text-center md:text-left">
+                &copy; 2025 GitDelivr Generator. All rights reserved.
+            </div>
+            <div class="text-sm text-slate-500 flex flex-col md:flex-row items-center gap-2">
+                <div class="flex items-center gap-1">
+                    Created with <span class="text-red-500 animate-pulse">♥</span> by 
+                    <a href="https://anuragfr.github.io" target="_blank" class="text-slate-300 hover:text-white font-medium transition border-b border-transparent hover:border-white">
+                        Anurag
+                    </a>
+                </div>
+                <span class="hidden md:inline text-slate-700">|</span>
+                <span>Verified Sender Identity: <a href="mailto:support@gitdelivr.in" class="hover:text-white transition">support@gitdelivr.in</a></span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Review Modal -->
+    <div id="reviewModal" class="modal fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+        <div class="modal-content bg-white dark:bg-slate-800 w-full max-w-md rounded-2xl shadow-2xl p-6 relative">
+            <button id="closeModal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+
+            <!-- Form Content -->
+            <div id="modalForm">
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-1">Share your experience</h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">How was your experience using GitDelivr ?</p>
+
+                <div class="mb-6">
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Name</label>
+                    <input type="text" id="reviewName" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white text-sm" placeholder="John Doe">
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Rating</label>
+                    <div class="flex space-x-2 star-rating">
+                        <button class="text-3xl text-gray-300 hover:scale-110 focus:outline-none" data-value="1">★</button>
+                        <button class="text-3xl text-gray-300 hover:scale-110 focus:outline-none" data-value="2">★</button>
+                        <button class="text-3xl text-gray-300 hover:scale-110 focus:outline-none" data-value="3">★</button>
+                        <button class="text-3xl text-gray-300 hover:scale-110 focus:outline-none" data-value="4">★</button>
+                        <button class="text-3xl text-gray-300 hover:scale-110 focus:outline-none" data-value="5">★</button>
+                    </div>
+                </div>
+
+                <div class="mb-6">
+                    <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">Your Review</label>
+                    <textarea id="reviewText" rows="3" class="w-full px-4 py-3 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:text-white text-sm resize-none" placeholder="It works great!"></textarea>
+                </div>
+
+                <button id="submitReview" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl shadow-lg shadow-blue-500/30 transition-all">
+                    Submit Review
+                </button>
+            </div>
+
+            <!-- Success Message (Hidden by default) -->
+            <div id="modalSuccess" class="hidden text-center py-8">
+                <div class="w-16 h-16 bg-green-100 text-green-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-bounce">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-900 dark:text-white mb-2">Thank you!</h3>
+                <p class="text-slate-500 dark:text-slate-400">Your feedback helps us improve.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms of Service Modal -->
+    <div id="tosModal" class="modal fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+        <div class="modal-content bg-white dark:bg-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl p-6 relative max-h-[80vh] overflow-y-auto">
+            <button id="closeTosModal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">Terms of Service</h3>
+            <div class="prose dark:prose-invert text-slate-600 dark:text-slate-300 text-sm space-y-4">
+                <p><strong>Last Updated:</strong> 2025</p>
+                <p>By using GitDelivr, you agree to these terms. Please read them carefully.</p>
+                
+                <h4 class="font-bold text-slate-900 dark:text-white">1. Service Description</h4>
+                <p>GitDelivr is a free tool that generates High-Speed CDN links for GitHub repositories. We do not host any files ourselves; all content is served via the GitDelivr network.</p>
+
+                <h4 class="font-bold text-slate-900 dark:text-white">2. Usage Limits</h4>
+                <p>While GitDelivr offers unlimited traffic, you agree not to use this tool for malicious purposes, including distributing malware, phishing, or illegal content.</p>
+
+                <h4 class="font-bold text-slate-900 dark:text-white">3. Disclaimer</h4>
+                <p>This service is provided "as is" without any warranties. We are not responsible for any downtime caused by GitHub or GitDelivr API changes.</p>
+
+                <h4 class="font-bold text-slate-900 dark:text-white">4. Privacy</h4>
+                <p>We respect your privacy. We do not store your repository code. We only collect anonymous usage statistics and newsletter emails (if subscribed).</p>
+            </div>
+            <div class="mt-6 text-right">
+                <button id="acceptTos" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors">I Understand</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Policy Modal -->
+    <div id="privacyModal" class="modal fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+        <div class="modal-content bg-white dark:bg-slate-800 w-full max-w-2xl rounded-2xl shadow-2xl p-6 relative max-h-[80vh] overflow-y-auto">
+            <button id="closePrivacyModal" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+            <h3 class="text-2xl font-bold text-slate-900 dark:text-white mb-4">Privacy Policy</h3>
+            <div class="prose dark:prose-invert text-slate-600 dark:text-slate-300 text-sm space-y-4">
+                <p><strong>Last Updated:</strong> 2025</p>
+                <p>Your privacy is important to us. This policy explains how GitDelivr handles your information.</p>
+                
+                <h4 class="font-bold text-slate-900 dark:text-white">1. Information Collection</h4>
+                <p>We do not collect personal data unless you voluntarily provide it (e.g., via the contact form or newsletter). We do not track your browsing history outside of this website.</p>
+
+                <h4 class="font-bold text-slate-900 dark:text-white">2. Repository Data</h4>
+                <p>When you generate a link, we process the repository URL to construct the GitDelivr link. We do not store your code or repository contents on our servers.</p>
+
+                <h4 class="font-bold text-slate-900 dark:text-white">3. Third-Party Services</h4>
+                <p>We use Google Firebase for hosting, analytics, and database services. Please refer to Google's Privacy Policy for details on how they handle data.</p>
+
+                <h4 class="font-bold text-slate-900 dark:text-white">4. Cookies</h4>
+                <p>We use local storage to save your theme preference (light/dark mode). We may use anonymous analytics cookies to improve the service.</p>
+            </div>
+            <div class="mt-6 text-right">
+                <button id="acceptPrivacy" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition-colors">I Understand</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal (Popup) -->
+    <div id="loginModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm hidden z-[9999] flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-slate-800 w-full max-w-md rounded-3xl shadow-2xl p-8 relative">
+            <!-- Loading Overlay -->
+            <div id="loginLoadingOverlay" class="absolute inset-0 bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-3xl flex-col items-center justify-center hidden z-10">
+                <svg class="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <p id="loginLoadingText" class="mt-4 text-lg font-semibold text-slate-700 dark:text-slate-200">Processing...</p>
+            </div>
+            <button onclick="closeModal('loginModal')" class="absolute top-5 right-5 text-slate-400 hover:text-slate-800 dark:hover:text-white transition">✕</button>
+            
+            <!-- Default Login / Create Account View -->
+            <div id="loginView" class="text-center">
+                <h2 class="text-2xl font-bold mb-2">Welcome Back</h2>
+                <p class="text-sm text-slate-500 mb-6">Login to generate links and save history.</p>
+                <button type="button" id="btnGithubLogin" class="w-full mb-3 flex items-center justify-center gap-3 bg-slate-900 hover:bg-slate-800 text-white dark:bg-white dark:text-slate-900 font-bold py-3 rounded-xl transition">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fill-rule="evenodd" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z" clip-rule="evenodd" /></svg>
+                    Continue with GitHub
+                </button>
+                <button type="button" id="btnGoogleLogin" class="w-full mb-6 flex items-center justify-center gap-3 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 dark:bg-slate-700 dark:text-white font-bold py-3 rounded-xl transition">
+                    <svg class="w-5 h-5" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.611,20.083H42V20H24v8h11.303c-1.649,4.657-6.08,8-11.303,8c-6.627,0-12-5.373-12-12c0-6.627,5.373-12,12-12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C12.955,4,4,12.955,4,24s8.955,20,20,20s20-8.955,20-20C44,22.659,43.862,21.35,43.611,20.083z"></path><path fill="#FF3D00" d="M6.306,14.691l6.571,4.819C14.655,15.108,18.961,12,24,12c3.059,0,5.842,1.154,7.961,3.039l5.657-5.657C34.046,6.053,29.268,4,24,4C16.318,4,9.656,8.337,6.306,14.691z"></path><path fill="#4CAF50" d="M24,44c5.166,0,9.86-1.977,13.409-5.192l-6.19-5.238C29.211,35.091,26.715,36,24,36c-5.223,0-9.65-3.657-11.303-8H6.306C9.656,39.663,16.318,44,24,44z"></path><path fill="#1976D2" d="M43.611,20.083H42V20H24v8h11.303c-0.792,2.237-2.231,4.166-4.087,5.574l6.19,5.238C39.99,36.506,44,30.836,44,24C44,22.659,43.862,21.35,43.611,20.083z"></path></svg>
+                    Continue with Google
+                </button>
+                
+                <div class="flex items-center my-4">
+                    <div class="flex-grow border-t dark:border-slate-700"></div>
+                    <span class="px-3 text-xs text-slate-400 uppercase">Or</span>
+                    <div class="flex-grow border-t dark:border-slate-700"></div>
+                </div>
+                
+                <form onsubmit="event.preventDefault();">
+                    <input type="email" id="authEmail" placeholder="Email" autocomplete="username" class="w-full p-3 mb-3 border rounded-xl dark:bg-slate-900 text-sm">
+                    <input type="password" id="authPass" placeholder="Password" autocomplete="current-password" class="w-full p-3 mb-2 border rounded-xl dark:bg-slate-900 text-sm">
+                    
+                    <div class="text-right mb-4">
+                        <button type="button" onclick="toggleView('forgotView')" class="text-xs text-blue-600 hover:underline font-bold">Forgot Password?</button>
+                    </div>
+                    
+                    <button type="submit" id="btnEmailLogin" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition">Login</button>
+                </form>
+                
+                <div id="unverifiedAlert" class="hidden mt-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl text-center transition-all">
+                    <p class="text-sm text-red-600 dark:text-red-400 mb-3 font-medium">Please verify your email before logging in.</p>
+                    <button id="btnResendVerification" class="w-full text-sm bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 rounded-lg transition shadow-sm">Resend Verification Email</button>
+                </div>
+
+                <p class="text-sm text-slate-500 mt-4">New here? <button type="button" onclick="toggleView('signupView')" class="text-blue-600 font-bold hover:underline">Create Account</button></p>
+            </div>
+
+            <!-- Forgot Password View -->
+            <div id="forgotView" class="text-center hidden">
+                <h2 class="text-2xl font-bold mb-2">Reset Password</h2>
+                <p class="text-sm text-slate-500 mb-6">Enter your email to receive a password reset link.</p>
+                
+                <input type="email" id="resetEmail" placeholder="Your Email" class="w-full p-3 mb-4 border rounded-xl dark:bg-slate-900 dark:border-slate-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all disabled:opacity-50">
+                
+                <!-- Status Message -->
+                <div id="forgotStatusMessage" class="hidden rounded-lg p-3 text-sm font-medium border mb-4 text-left transition-all duration-300"></div>
+
+                <button id="btnResetPass" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-3 rounded-xl mb-4 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
+                    <svg id="forgotSpinner" class="animate-spin hidden h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span id="forgotBtnText">Send Reset Link</span>
+                </button>
+                <p class="text-sm text-slate-500 mt-2">Remembered it? <button type="button" onclick="toggleView('loginView')" class="text-blue-600 font-bold hover:underline">Back to Login</button></p>
+            </div>
+
+            <!-- Signup View -->
+            <div id="signupView" class="text-center hidden">
+                <h2 class="text-2xl font-bold mb-2">Create Account</h2>
+                <p class="text-sm text-slate-500 mb-6">Join us to save your generated links.</p>
+                
+                <form onsubmit="event.preventDefault();">
+                    <input type="text" id="signupName" placeholder="Full Name" autocomplete="name" class="w-full p-3 mb-3 border rounded-xl dark:bg-slate-900 text-sm">
+                    <input type="email" id="signupEmail" placeholder="Email" autocomplete="username" class="w-full p-3 mb-3 border rounded-xl dark:bg-slate-900 text-sm">
+                    <input type="password" id="signupPass" placeholder="Password (6+ chars)" autocomplete="new-password" class="w-full p-3 mb-4 border rounded-xl dark:bg-slate-900 text-sm">
+                    
+                    <button type="submit" id="btnEmailSignup" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl mb-4 transition">Sign Up</button>
+                </form>
+                <p class="text-sm text-slate-500 mt-2">Already have an account? <button type="button" onclick="toggleView('loginView')" class="text-blue-600 font-bold hover:underline">Login</button></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Google AdSense Container (Bottom Banner) -->
+    <div id="adBannerContainer" class="fixed bottom-0 w-full border-t border-slate-200 dark:border-slate-700 p-2 z-50 hidden transition-colors"></div>
+
+    <script>
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function toggleView(viewId) {
+            ['loginView', 'signupView', 'forgotView'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.classList.add('hidden');
+            });
+            const target = document.getElementById(viewId);
+            if(target) target.classList.remove('hidden');
+        }
+    </script>
+    <script type="module" src="script.js"></script>
+</body>
+</html>
+   

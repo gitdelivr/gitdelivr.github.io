@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Article | GitDelivr</title>
+    
+    <!-- Dynamic SEO Meta Tags -->
+    <meta id="meta-description" name="description" content="Read the latest updates and engineering insights from GitDelivr.">
+    <meta id="meta-og-title" property="og:title" content="Article | GitDelivr">
+    <meta id="meta-og-description" property="og:description" content="Read the latest updates and engineering insights from GitDelivr.">
+    <meta id="meta-og-image" property="og:image" content="https://gitdelivr.in/preview.png">
+    <meta name="twitter:card" content="summary_large_image">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: { brand: { main: '#0B1121', card: '#151e32', blue: '#2563EB', text: '#cbd5e1', border: '#1E293B' } }
+                }
+            }
+        }
+    </script>
+    
+    <style type="text/tailwindcss">
+        .glass-nav { background-color: rgba(11, 17, 33, 0.95); backdrop-filter: blur(10px); }
+        /* Custom styling for Code blocks inside Markdown */
+        .prose pre { background-color: #0f1524 !important; border: 1px solid #1E293B; }
+        .prose code { font-family: 'JetBrains Mono', monospace; }
+    </style>
+</head>
+<body class="bg-brand-main text-brand-text antialiased font-sans flex flex-col min-h-screen">
+
+    <nav class="sticky top-0 z-50 glass-nav border-b border-brand-border py-4">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <a href="/" class="flex items-center gap-2 font-bold text-xl text-white tracking-tight">
+                <i class="fa-solid fa-bolt text-brand-blue"></i> GitDelivr
+            </a>
+            <a href="index.html" class="text-sm font-medium text-gray-400 hover:text-white transition">← Back to Blog</a>
+        </div>
+        <!-- Reading Progress Bar -->
+        <div class="absolute bottom-0 left-0 w-full h-[2px] bg-transparent">
+            <div id="progress-bar" class="h-full bg-brand-blue w-0 transition-all duration-150 ease-out"></div>
+        </div>
+    </nav>
+
+    <main id="main-content" class="flex-grow">
+        <!-- Decorative Background Glow -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[400px] bg-brand-blue/20 blur-[120px] rounded-full pointer-events-none -z-10"></div>
+
+        <div id="loading" class="py-32 text-center">
+            <i class="fa-solid fa-circle-notch fa-spin text-4xl text-brand-blue mb-4"></i>
+            <p class="text-gray-500">Loading article from Edge...</p>
+        </div>
+
+        <article id="article" class="hidden flex-grow">
+            <div class="max-w-4xl mx-auto px-6 pt-16 pb-8 text-center">
+                <span id="post-category" class="bg-[rgba(37,99,235,0.15)] text-brand-blue text-xs font-bold px-3 py-1 uppercase tracking-widest rounded-full border border-[rgba(37,99,235,0.3)] mb-6 inline-block">Updates</span>
+                <h1 id="post-title" class="text-4xl md:text-5xl font-bold mb-6 text-white tracking-tight leading-tight">Title</h1>
+                <div class="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-400 mt-4">
+                    <div class="flex items-center gap-2">
+                        <img id="author-avatar" src="https://ui-avatars.com/api/?name=GitDelivr&background=2563EB&color=fff" class="w-8 h-8 rounded-full border border-brand-border object-cover" alt="Author">
+                        <span id="author-name" class="font-medium text-gray-300">GitDelivr Team</span>
+                    </div>
+                    <span class="text-gray-600 hidden sm:inline">•</span>
+                    <span id="post-date"><i class="fa-regular fa-calendar mr-2"></i> Date</span>
+                    <span class="text-gray-600">•</span>
+                    <span><i class="fa-regular fa-clock mr-2"></i> 5 min read</span>
+                </div>
+            </div>
+
+            <div class="max-w-5xl mx-auto px-6 mb-12">
+                <div class="relative rounded-2xl overflow-hidden shadow-2xl border border-brand-border group">
+                    <div class="absolute inset-0 bg-gradient-to-t from-brand-main to-transparent opacity-60 z-10 pointer-events-none"></div>
+                    <img id="post-image" src="" alt="" class="w-full h-[300px] md:h-[500px] object-cover opacity-90 group-hover:scale-105 transition-transform duration-700">
+                </div>
+            </div>
+
+            <div class="max-w-3xl mx-auto px-6 py-8 overflow-x-hidden">
+                <div id="post-body" class="prose prose-invert prose-lg md:prose-xl max-w-none text-gray-300 prose-headings:text-white prose-a:text-brand-blue hover:prose-a:text-blue-400 prose-img:rounded-xl shadow-sm"></div>
+            </div>
+
+            <!-- Share Section -->
+            <div class="max-w-3xl mx-auto px-6 py-8 border-t border-brand-border mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                <span class="text-gray-400 font-medium text-sm uppercase tracking-widest">Share this article</span>
+                <div class="flex gap-3">
+                    <button onclick="window.open('https://twitter.com/intent/tweet?text='+encodeURIComponent(document.title)+'&url='+encodeURIComponent(window.location.href))" class="w-10 h-10 rounded-full bg-brand-card border border-brand-border flex items-center justify-center text-gray-400 hover:text-[#1DA1F2] hover:border-[#1DA1F2] hover:shadow-[0_0_15px_rgba(29,161,242,0.3)] transition-all" aria-label="Share on Twitter"><i class="fa-brands fa-twitter"></i></button>
+                    <button onclick="window.open('https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(window.location.href))" class="w-10 h-10 rounded-full bg-brand-card border border-brand-border flex items-center justify-center text-gray-400 hover:text-[#0A66C2] hover:border-[#0A66C2] hover:shadow-[0_0_15px_rgba(10,102,194,0.3)] transition-all" aria-label="Share on LinkedIn"><i class="fa-brands fa-linkedin-in"></i></button>
+                    <button onclick="navigator.clipboard.writeText(window.location.href); alert('Link copied to clipboard!')" class="w-10 h-10 rounded-full bg-brand-card border border-brand-border flex items-center justify-center text-gray-400 hover:text-white hover:border-white transition-all" aria-label="Copy Link"><i class="fa-solid fa-link"></i></button>
+                </div>
+            </div>
+        </article>
+
+        <section id="related-posts" class="max-w-7xl mx-auto px-6 py-16 border-t border-brand-border hidden">
+            <h2 class="text-2xl font-bold text-white mb-8">Continue Reading</h2>
+            <div id="related-posts-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8"></div>
+        </section>
+
+        <div id="error" class="hidden py-32 text-center px-6">
+            <i class="fa-solid fa-triangle-exclamation text-4xl text-red-500 mb-4"></i>
+            <h2 class="text-2xl font-bold text-white mb-2">Article Not Found</h2>
+            <p class="text-gray-500 mb-6">This content may have been moved or deleted.</p>
+            <a href="index.html" class="px-6 py-3 bg-brand-blue text-white rounded hover:bg-blue-600 transition">Return to Blog</a>
+        </div>
+    </main>
+
+    <footer class="bg-[#020617] text-gray-500 py-10 border-t border-brand-border text-center text-sm mt-auto">
+        <p>&copy; 2026 GitDelivr. Built for Developers.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/contentful@latest/dist/contentful.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <script>
+        // Configuration setup only ONCE
+        const SPACE_ID = 'guwiw3f81shk';
+        const ACCESS_TOKEN = 'MaRT24JyPHiRR7cbc7Mq0L8kUHUOHsN9__Ot1fHqGZs';
+        const CONTENT_TYPE = 'blogPost';
+
+        const client = contentful.createClient({ space: SPACE_ID, accessToken: ACCESS_TOKEN });
+        const urlParams = new URLSearchParams(window.location.search);
+        const id = urlParams.get('id');
+
+        const loadingEl = document.getElementById('loading');
+        const articleEl = document.getElementById('article');
+        const errorEl = document.getElementById('error');
+
+        // Fetch Main Article
+        if (id) {
+            client.getEntry(id).then((entry) => {
+                const fields = entry.fields;
+                
+                // Contentful automatically resolves linked assets. We just check if it exists.
+                const imgField = fields.image || fields.coverImage;
+                let imageUrl = 'https://images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=1200'; // Default
+                if (imgField && imgField.fields && imgField.fields.file) {
+                    let url = imgField.fields.file.url;
+                    imageUrl = url.startsWith('http') ? url : 'https:' + url;
+                }
+
+                renderPost(fields, imageUrl);
+            }).catch(error => {
+                console.error("Error fetching article:", error);
+                loadingEl.classList.add('hidden');
+                errorEl.classList.remove('hidden');
+            });
+        } else {
+            loadingEl.classList.add('hidden');
+            errorEl.classList.remove('hidden');
+        }
+
+        // Rich Text Parser Logic
+        function renderRichText(node) {
+            if (node.nodeType === 'text') {
+                let value = node.value;
+                if (node.marks) {
+                    node.marks.forEach(m => {
+                        if (m.type === 'bold') value = `<strong>${value}</strong>`;
+                        if (m.type === 'code') value = `<code>${value}</code>`;
+                    });
+                }
+                return value.replace(/\n/g, '<br>');
+            }
+            const content = node.content ? node.content.map(c => renderRichText(c)).join('') : '';
+            switch (node.nodeType) {
+                case 'document': return content;
+                case 'paragraph': return `<p>${content}</p>`;
+                case 'heading-1': return `<h1>${content}</h1>`;
+                case 'heading-2': return `<h2>${content}</h2>`;
+                case 'heading-3': return `<h3>${content}</h3>`;
+                case 'unordered-list': return `<ul>${content}</ul>`;
+                case 'list-item': return `<li>${content}</li>`;
+                case 'blockquote': return `<blockquote>${content}</blockquote>`;
+                case 'embedded-asset-block':
+                    if (node.data.target?.fields?.file?.url) {
+                        let url = node.data.target.fields.file.url;
+                        let src = url.startsWith('http') ? url : 'https:' + url;
+                        return `<img src="${src}" class="rounded-lg shadow-lg my-6" />`;
+                    }
+                    return '';
+                default: return content;
+            }
+        }
+
+        // Fetch Related Posts
+        function fetchRelatedPosts(currentId, category) {
+            const q = { content_type: CONTENT_TYPE, 'sys.id[ne]': currentId, limit: 3, order: '-sys.createdAt' };
+            if (category) q['fields.category'] = category;
+
+            client.getEntries(q).then(res => {
+                if (res.items.length > 0) renderRelated(res.items);
+                else if (category) { 
+                    delete q['fields.category']; 
+                    client.getEntries(q).then(r => renderRelated(r.items)); 
+                }
+            }).catch(console.error);
+        }
+
+        // Render Related Posts
+        function renderRelated(posts) {
+            const container = document.getElementById('related-posts-grid');
+            if (posts.length === 0) return;
+            document.getElementById('related-posts').classList.remove('hidden');
+            
+            container.innerHTML = posts.map(post => {
+                const { title, category, publishedDate, image, coverImage } = post.fields;
+                
+                // Directly access the resolved image URL
+                const imgField = image || coverImage;
+                let img = 'https://images.unsplash.com/photo-1558494949-ef248ac84f83?q=80&w=800'; // Default Fallback
+                if (imgField && imgField.fields && imgField.fields.file) {
+                    let url = imgField.fields.file.url;
+                    img = url.startsWith('http') ? url : 'https:' + url;
+                }
+
+                const date = publishedDate ? new Date(publishedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : '';
+                
+                return `
+                <article class="bg-brand-card rounded-xl overflow-hidden border border-brand-border group hover:border-brand-blue transition-all transform hover:-translate-y-1">
+                    <div class="h-40 overflow-hidden"><img src="${img}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all"></div>
+                    <div class="p-5 flex flex-col flex-grow">
+                        <div class="text-xs text-gray-500 mb-2">${date}</div>
+                        <h3 class="font-bold text-white mb-2 group-hover:text-brand-blue transition"><a href="blog-post.html?id=${post.sys.id}">${title}</a></h3>
+                        <a href="blog-post.html?id=${post.sys.id}" class="inline-flex items-center text-brand-blue font-medium text-xs hover:text-white transition-colors mt-auto">Read more →</a>
+                    </div>
+                </article>`;
+            }).join('');
+        }
+
+        // Render Main Article
+        function renderPost(post, imageUrl) {
+            document.title = `${post.title} | GitDelivr`;
+            
+            // Dynamically Update SEO Meta Tags
+            const excerpt = post.excerpt || post.summary || `Read this article about ${post.title} on GitDelivr.`;
+            const metaDesc = document.getElementById('meta-description');
+            const ogTitle = document.getElementById('meta-og-title');
+            const ogDesc = document.getElementById('meta-og-description');
+            const ogImage = document.getElementById('meta-og-image');
+            
+            if (metaDesc) metaDesc.content = excerpt;
+            if (ogTitle) ogTitle.content = `${post.title} | GitDelivr`;
+            if (ogDesc) ogDesc.content = excerpt;
+            if (ogImage && imageUrl) ogImage.content = imageUrl;
+
+            document.getElementById('post-title').innerText = post.title;
+            document.getElementById('post-category').innerText = post.category || 'Engineering';
+            
+            const date = post.publishedDate ? new Date(post.publishedDate).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) : '';
+            document.getElementById('post-date').innerHTML = `<i class="fa-regular fa-calendar mr-2"></i> ${date}`;
+
+            document.getElementById('post-image').src = imageUrl;
+
+            // Extract Author Information
+            let authorName = 'GitDelivr Team';
+            let authorAvatar = 'https://ui-avatars.com/api/?name=GitDelivr&background=2563EB&color=fff';
+            
+            if (post.author && post.author.fields) {
+                authorName = post.author.fields.name || authorName;
+                if (post.author.fields.avatar && post.author.fields.avatar.fields && post.author.fields.avatar.fields.file) {
+                    let url = post.author.fields.avatar.fields.file.url;
+                    authorAvatar = url.startsWith('http') ? url : 'https:' + url;
+                } else {
+                    authorAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=2563EB&color=fff`;
+                }
+            } else if (post.authorName) {
+                authorName = post.authorName;
+                authorAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=2563EB&color=fff`;
+            }
+            
+            document.getElementById('author-name').innerText = authorName;
+            document.getElementById('author-avatar').src = authorAvatar;
+
+            const content = post.body || post.content;
+            const bodyEl = document.getElementById('post-body');
+            
+            if (content) {
+                if (typeof content === 'string') {
+                    bodyEl.innerHTML = marked.parse(content);
+                } else if (content.nodeType === 'document') {
+                    bodyEl.innerHTML = renderRichText(content);
+                }
+            }
+
+            loadingEl.classList.add('hidden');
+            articleEl.classList.remove('hidden');
+            
+            // Only fetch related posts if we have the original ID parameter
+            if (id) {
+                fetchRelatedPosts(id, post.category);
+            }
+        }
+
+        // Reading Progress Bar Logic
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            const progressBar = document.getElementById('progress-bar');
+            if (progressBar) progressBar.style.width = scrolled + "%";
+        });
+    </script>
+</body>
+</html>

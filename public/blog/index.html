@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog & Updates | GitDelivr</title>
+    <meta name="description" content="Latest updates, engineering insights, and tutorials from the GitDelivr team.">
+    
+    <!-- Open Graph & Social SEO -->
+    <meta property="og:title" content="Blog & Updates | GitDelivr">
+    <meta property="og:description" content="Latest updates, engineering insights, and tutorials from the GitDelivr team.">
+    <meta property="og:image" content="https://gitdelivr.in/preview.png">
+    <meta name="twitter:card" content="summary_large_image">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: {
+                        brand: { main: '#0B1121', card: '#151e32', blue: '#2563EB', text: '#cbd5e1', border: '#1E293B' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        .glass-nav { background-color: rgba(11, 17, 33, 0.95); backdrop-filter: blur(10px); }
+    </style>
+</head>
+<body class="bg-brand-main text-brand-text antialiased font-sans flex flex-col min-h-screen">
+
+    <nav class="sticky top-0 z-50 glass-nav border-b border-brand-border py-4" id="navbar">
+        <div class="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <a href="/" class="flex items-center gap-2 group font-bold text-xl text-white tracking-tight">
+                <i class="fa-solid fa-bolt text-brand-blue"></i> GitDelivr
+            </a>
+            <div class="hidden lg:flex items-center gap-6 font-medium text-sm text-gray-400">
+                <a href="/public/index.html" class="text-white">Home</a>
+                <a href="/public/cdn_generator.html" class="px-4 py-2 bg-brand-blue text-white rounded hover:bg-blue-600 transition shadow-lg">Generate Link</a>
+            </div>
+        </div>
+    </nav>
+
+    <header class="py-20 text-center relative overflow-hidden border-b border-brand-border" style="background: radial-gradient(circle at top, #1e293b 0%, #0B1121 70%);">
+        <div class="max-w-4xl mx-auto px-6 relative z-10">
+            <span class="text-brand-blue font-bold tracking-widest uppercase text-xs mb-4 block">Engineering & Updates</span>
+            <h1 class="text-4xl md:text-5xl font-bold text-white mb-6 tracking-tight">Building the Native Edge</h1>
+            <p class="text-gray-400 text-lg max-w-2xl mx-auto font-light">Explore release notes, architecture deep-dives, and guides on delivering your open-source assets faster.</p>
+        </div>
+    </header>
+
+    <main class="py-16 px-6 max-w-7xl mx-auto w-full flex-grow">
+        
+        <div id="category-filters" class="flex flex-wrap justify-center gap-3 mb-16">
+            <button data-category="" class="filter-btn px-5 py-2 bg-brand-blue text-white rounded-full text-sm font-medium transition">All Articles</button>
+            <button data-category="Releases" class="filter-btn px-5 py-2 bg-brand-card border border-brand-border text-gray-400 rounded-full text-sm font-medium hover:border-brand-blue hover:text-white transition">Releases</button>
+            <button data-category="Engineering" class="filter-btn px-5 py-2 bg-brand-card border border-brand-border text-gray-400 rounded-full text-sm font-medium hover:border-brand-blue hover:text-white transition">Engineering</button>
+            <button data-category="Tutorials" class="filter-btn px-5 py-2 bg-brand-card border border-brand-border text-gray-400 rounded-full text-sm font-medium hover:border-brand-blue hover:text-white transition">Tutorials</button>
+        </div>
+
+        <div id="blog-posts-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
+            <div class="col-span-full text-center py-20 text-gray-500">
+                <i class="fa-solid fa-circle-notch fa-spin text-3xl mb-4 text-brand-blue"></i>
+                <p>Fetching from Edge...</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-[#020617] text-gray-500 py-10 border-t border-brand-border text-center text-sm">
+        <p>&copy; 2026 GitDelivr. Built by Developers, for Developers.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/contentful@latest/dist/contentful.browser.min.js"></script>
+    
+    <script>
+        // --- CONFIGURATION ---
+        const SPACE_ID = 'guwiw3f81shk';
+        const ACCESS_TOKEN = 'MaRT24JyPHiRR7cbc7Mq0L8kUHUOHsN9__Ot1fHqGZs';
+        const CONTENT_TYPE = 'blogPost';
+
+        const client = contentful.createClient({ space: SPACE_ID, accessToken: ACCESS_TOKEN });
+
+        // --- MOCK DATA (GitDelivr Context) ---
+        const MOCK_POSTS = [
+            {
+                sys: { id: 'mock-1', createdAt: '2026-03-01T00:00:00Z' },
+                fields: {
+                    title: 'Introducing GitDelivr V3.0 Native Edition',
+                    slug: 'gitdelivr-v3-launch',
+                    excerpt: 'We have completely rebuilt our infrastructure to serve developers better. Sub-10ms latency globally.',
+                    category: 'Releases',
+                    publishedDate: '2026-03-01',
+                    // Image URL as a real unsplash link, not just a sys ID
+                    coverImage: { fields: { file: { url: '//images.unsplash.com/photo-1555066931-4365d14bab8c?q=80&w=800' } } }
+                }
+            },
+            {
+                sys: { id: 'mock-2', createdAt: '2026-02-15T00:00:00Z' },
+                fields: {
+                    title: 'How we achieve 100% Cache HIT ratio',
+                    slug: 'cache-hit-ratio-architecture',
+                    excerpt: 'A deep dive into our Cloudflare Worker architecture and how we bypass GitHub API rate limits natively.',
+                    category: 'Engineering',
+                    publishedDate: '2026-02-15',
+                    coverImage: { fields: { file: { url: '//images.unsplash.com/photo-1518770660439-4636190af475?q=80&w=800' } } }
+                }
+            },
+            {
+                sys: { id: 'mock-3', createdAt: '2026-01-20T00:00:00Z' },
+                fields: {
+                    title: 'Serving GitLab & Bitbucket files natively',
+                    slug: 'gitlab-bitbucket-support',
+                    excerpt: 'Learn how to generate CDN links for your GitLab and Bitbucket repositories without any API keys.',
+                    category: 'Tutorials',
+                    publishedDate: '2026-01-20',
+                    coverImage: { fields: { file: { url: '//images.unsplash.com/photo-1618401471353-b98afee0b2eb?q=80&w=800' } } }
+                }
+            }
+        ];
+
+        const container = document.getElementById('blog-posts-container');
+        const filtersContainer = document.getElementById('category-filters');
+
+        function formatDate(dateString) {
+            return new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+        }
+
+        function renderPosts(posts) {
+            if (posts.length === 0) {
+                container.innerHTML = '<div class="col-span-full text-center py-10 text-gray-500">No articles found in this category.</div>';
+                return;
+            }
+
+            container.innerHTML = posts.map(post => {
+                const { title, excerpt, category, publishedDate, image, coverImage, author, authorName: rawAuthorName } = post.fields;
+                const id = post.sys.id;
+                const postLink = `blog-post.html?id=${id}`;
+                
+                const imgField = image || coverImage;
+                let imageUrl = 'https://images.unsplash.com/photo-1558494949-ef248ac84f83?q=80&w=800'; // Fallback laptop image
+                if (imgField && imgField.fields && imgField.fields.file) {
+                    let url = imgField.fields.file.url;
+                    imageUrl = url.startsWith('http') ? url : 'https:' + url;
+                }
+
+                const date = publishedDate ? formatDate(publishedDate) : formatDate(post.sys.createdAt);
+                
+                // Author extraction logic
+                let authorName = 'GitDelivr Team';
+                let authorAvatar = 'https://ui-avatars.com/api/?name=GitDelivr&background=2563EB&color=fff';
+                
+                if (author && author.fields) {
+                    authorName = author.fields.name || authorName;
+                    if (author.fields.avatar && author.fields.avatar.fields && author.fields.avatar.fields.file) {
+                        let url = author.fields.avatar.fields.file.url;
+                        authorAvatar = url.startsWith('http') ? url : 'https:' + url;
+                    } else {
+                        authorAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=2563EB&color=fff`;
+                    }
+                } else if (rawAuthorName) {
+                    authorName = rawAuthorName;
+                    authorAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(authorName)}&background=2563EB&color=fff`;
+                }
+
+                return `
+                <article class="bg-brand-card rounded-xl overflow-hidden border border-brand-border group hover:border-brand-blue transition-all duration-300 flex flex-col transform hover:-translate-y-1">
+                    <div class="relative h-48 overflow-hidden bg-[#0f1524]">
+                        <img src="${imageUrl}" class="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500" alt="${title}">
+                        ${category ? `<div class="absolute top-4 left-4 bg-[rgba(37,99,235,0.2)] text-brand-blue text-xs font-bold px-3 py-1 uppercase tracking-widest rounded-full border border-[rgba(37,99,235,0.3)]">${category}</div>` : ''}
+                    </div>
+                    <div class="p-6 flex flex-col flex-grow">
+                        <div class="flex items-center gap-2 mb-4 text-xs text-gray-500">
+                            <img src="${authorAvatar}" alt="${authorName}" class="w-6 h-6 rounded-full object-cover border border-brand-border">
+                            <span class="font-medium text-gray-300">${authorName}</span>
+                            <span class="text-gray-600">•</span>
+                            <span><i class="fa-regular fa-calendar mr-1"></i> ${date}</span>
+                        </div>
+                        <h3 class="text-xl font-bold text-white mb-3 group-hover:text-brand-blue transition-colors leading-tight">
+                            <a href="${postLink}" class="focus:outline-none">${title}</a>
+                        </h3>
+                        <p class="text-gray-400 text-sm mb-6 flex-grow leading-relaxed">${excerpt || ''}</p>
+                        <a href="${postLink}" class="inline-flex items-center text-brand-blue font-medium text-sm hover:text-white transition-colors mt-auto">
+                            Read Article <i class="fa-solid fa-arrow-right ml-2 text-xs"></i>
+                        </a>
+                    </div>
+                </article>
+                `;
+            }).join('');
+        }
+
+        function fetchAndRenderPosts(category) {
+            const query = { content_type: CONTENT_TYPE, order: '-sys.createdAt' };
+            if (category) query['fields.category'] = category;
+
+            container.innerHTML = `<div class="col-span-full text-center py-20 text-gray-500"><i class="fa-solid fa-circle-notch fa-spin text-3xl mb-4 text-brand-blue"></i><p>Fetching from Edge...</p></div>`;
+
+            client.getEntries(query).then((response) => {
+                // IMPORTANT: Pass whole response to helper function for asset includes
+                if (response.items.length > 0) renderPosts(response.items);
+                else renderPosts(category ? MOCK_POSTS.filter(p => p.fields.category === category) : MOCK_POSTS);
+            }).catch((error) => {
+                console.error("API Error, loading mock data:", error);
+                renderPosts(category ? MOCK_POSTS.filter(p => p.fields.category === category) : MOCK_POSTS);
+            });
+        }
+
+        // Filters Logic
+        const filterBtns = filtersContainer.querySelectorAll('.filter-btn');
+        filterBtns.forEach(button => {
+            button.addEventListener('click', () => {
+                const cat = button.dataset.category;
+                filterBtns.forEach(btn => {
+                    btn.classList.remove('bg-brand-blue', 'text-white');
+                    btn.classList.add('bg-brand-card', 'border-brand-border', 'text-gray-400');
+                });
+                button.classList.add('bg-brand-blue', 'text-white');
+                button.classList.remove('bg-brand-card', 'border-brand-border', 'text-gray-400');
+                fetchAndRenderPosts(cat || null);
+            });
+        });
+
+        fetchAndRenderPosts(null);
+    </script>
+</body>
+</html>
